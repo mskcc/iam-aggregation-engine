@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D56DB6DC-95E5-4CE1-B0A6-E99EB3C37155}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure", "src\Infrastructure\Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.csproj", "{B5634716-D06A-4837-A41D-B2EA124634B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mskcc.Tools.Idp.ConnectionsAggregator.Domain", "src\Domain\Mskcc.Tools.Idp.ConnectionsAggregator.Domain.csproj", "{31C78060-14F0-472D-8E01-1ABEF87FE576}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mskcc.Tools.Idp.ConnectionsAggregator.Application", "src\Application\Mskcc.Tools.Idp.ConnectionsAggregator.Application.csproj", "{6FA96FF2-C4A7-4F44-ABD4-1ADECF8B18B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mskcc.Tools.Idp.ConnectionsAggregator.Api", "src\Api\Mskcc.Tools.Idp.ConnectionsAggregator.Api.csproj", "{A93F2B62-00A8-4F88-9901-D20BD6F3F2CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8E41EE56-08C3-4DA1-B9C1-2A182C92DB2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mskcc.Tools.Idp.ConnectionsAggregator.Application.Tests", "tests\Application.UnitTests\Mskcc.Tools.Idp.ConnectionsAggregator.Application.Tests.csproj", "{3E80967D-1914-4E30-BBA8-F574C59759C2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5634716-D06A-4837-A41D-B2EA124634B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5634716-D06A-4837-A41D-B2EA124634B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5634716-D06A-4837-A41D-B2EA124634B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5634716-D06A-4837-A41D-B2EA124634B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31C78060-14F0-472D-8E01-1ABEF87FE576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31C78060-14F0-472D-8E01-1ABEF87FE576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31C78060-14F0-472D-8E01-1ABEF87FE576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31C78060-14F0-472D-8E01-1ABEF87FE576}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FA96FF2-C4A7-4F44-ABD4-1ADECF8B18B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FA96FF2-C4A7-4F44-ABD4-1ADECF8B18B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FA96FF2-C4A7-4F44-ABD4-1ADECF8B18B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FA96FF2-C4A7-4F44-ABD4-1ADECF8B18B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A93F2B62-00A8-4F88-9901-D20BD6F3F2CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A93F2B62-00A8-4F88-9901-D20BD6F3F2CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A93F2B62-00A8-4F88-9901-D20BD6F3F2CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A93F2B62-00A8-4F88-9901-D20BD6F3F2CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E80967D-1914-4E30-BBA8-F574C59759C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E80967D-1914-4E30-BBA8-F574C59759C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E80967D-1914-4E30-BBA8-F574C59759C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E80967D-1914-4E30-BBA8-F574C59759C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B5634716-D06A-4837-A41D-B2EA124634B8} = {D56DB6DC-95E5-4CE1-B0A6-E99EB3C37155}
+		{31C78060-14F0-472D-8E01-1ABEF87FE576} = {D56DB6DC-95E5-4CE1-B0A6-E99EB3C37155}
+		{6FA96FF2-C4A7-4F44-ABD4-1ADECF8B18B2} = {D56DB6DC-95E5-4CE1-B0A6-E99EB3C37155}
+		{A93F2B62-00A8-4F88-9901-D20BD6F3F2CB} = {D56DB6DC-95E5-4CE1-B0A6-E99EB3C37155}
+		{3E80967D-1914-4E30-BBA8-F574C59759C2} = {8E41EE56-08C3-4DA1-B9C1-2A182C92DB2C}
+	EndGlobalSection
+EndGlobal

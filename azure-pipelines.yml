@@ -1,0 +1,57 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+- develop
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- script: |
+    dotnet restore $(solution)  # Ensure packages are restored before scanning
+    dotnet package --vulnerable $(solution) --out $(Build.ArtifactStagingDirectory)/vulnerabilities_report.txt
+  displayName: 'Check for vulnerable packages with dotnet package --vulnerable'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/vulnerabilities_report.txt'
+    ArtifactName: 'vulnerabilities_report'
+    publishLocation: 'Container'
+
+- script: |
+    choco install cloc -y
+    cloc $(Build.SourcesDirectory) --include-lang="C#" --out=$(Build.ArtifactStagingDirectory)/cloc_report.txt
+  displayName: 'Run cloc for metrics on C# code'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/cloc_report.txt'
+    ArtifactName: 'cloc_report'
+    publishLocation: 'Container'

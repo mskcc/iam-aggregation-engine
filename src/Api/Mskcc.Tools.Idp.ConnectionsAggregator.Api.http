@@ -1,0 +1,82 @@
+@Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress = https://localhost:7250
+
+# OIDC Connections
+### Get OIDC Connections
+GET {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/pingfederate/oidc/connections
+Accept: application/json
+
+###
+
+### Run OIDC Connections Aggregation
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/pingfederate/oidc/connections/aggregation
+Accept: application/json
+
+###
+
+### Run OIDC Connections Purge
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/pingfederate/oidc/connections/purge
+Accept: application/json
+
+###
+
+# SAML Connections
+### Get SAML Connections
+GET {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/pingfederate/saml/connections
+Accept: application/json
+
+###
+
+### Run SAML Connections Aggregation
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/pingfederate/saml/connections/aggregation
+Accept: application/json
+
+###
+
+### Run SAML Connections Purge
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/pingfederate/saml/connections/purge
+Accept: application/json
+
+###
+
+# Health Checks
+### Run Health Checks
+GET {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/health
+Accept: application/json
+
+###
+
+# Legacy Connections
+### Get Legacy Connections
+GET {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/mskcc/legacy/connections
+Accept: application/json
+
+###
+
+### Run Legacy Connections Aggregation
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/mskcc/legacy/connections/aggregation
+Accept: application/json
+
+###
+
+### Run Legacy Connections Purge
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/mskcc/legacy/connections/purge
+Accept: application/json
+
+###
+
+# Service Now Applications
+### Get Service Now Applications
+GET {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/servicenow/applications
+Accept: application/json
+
+###
+
+### Run Service Now Applications Aggregation
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/servicenow/applications/aggregation
+Accept: application/json
+
+###
+
+### Run Service Now Applications Purge
+POST {{Mskcc.Tools.Idp.ConnectionsAggregator.Api_HostAddress}}/servicenow/applications/purge
+Accept: application/json
