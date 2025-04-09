@@ -139,4 +139,9 @@ public class ApiOptions
     /// Options for recurring purges.
     /// </summary>
     public string PurgeSchedule { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Options for the Hangfire dashboard path.
+    /// </summary>
+    public string HangfireDashboardPath { get; set;} = string.Empty;
 }
