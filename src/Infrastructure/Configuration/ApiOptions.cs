@@ -144,4 +144,9 @@ public class ApiOptions
     /// Options for the Hangfire dashboard path.
     /// </summary>
     public string HangfireDashboardPath { get; set;} = string.Empty;
+
+    /// <summary>
+    /// Options for the Hangfire dashboard read-only mode.
+    /// </summary>
+    public bool HangfireDashboardIsReadOnly { get; set; }
 }
