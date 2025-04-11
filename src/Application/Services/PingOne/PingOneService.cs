@@ -4,7 +4,6 @@ using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Constants;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Configuration;
 
-
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.PingOne;
 
 public class PingOneService : IPingOneService
