@@ -14,4 +14,14 @@ public static class HttpClientNames
     /// The name of the Service Now client.
     /// </summary>
     public const string ServiceNowClient = "Mskcc.ServiceNow.Client";
+
+    /// <summary>
+    /// The name of the PingOne client.
+    /// </summary>
+    public const string PingOneClient = "Mskcc.PingOne.Client";
+
+    /// <summary>
+    /// The name of the PingOne client.
+    /// </summary>
+    public const string PingOneOauthClient = "Mskcc.PingOne.Oauth.Client";
 }

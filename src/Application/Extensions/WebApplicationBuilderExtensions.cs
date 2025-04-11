@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.IdentityLinkingService;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Extensions;
 
@@ -332,6 +333,8 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddOptionsWithValidateOnStart<ApiOptions>()
             .BindConfiguration(ApiOptions.SectionKey);
+        builder.Services.AddOptionsWithValidateOnStart<PingOneOptions>()
+            .BindConfiguration(PingOneOptions.SectionKey);
         
         return builder;
     }
@@ -407,6 +410,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddScoped<IPingFederateService, PingFederateService>();
         builder.Services.AddScoped<ILegacyService, LegacyService>();
         builder.Services.AddScoped<IServiceNowService, ServiceNowService>();
+        builder.Services.AddScoped<IIdentityLinkingService, IdentityLinkingService>();
         builder.Services
             .AddHttpContextAccessor()
             .AddScoped<IUriHelperService, UriHelperService>(services => {
@@ -415,6 +419,9 @@ public static class WebApplicationBuilderExtensions
                 var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
                 return new UriHelperService(uri);
             });
+
+        // PingIdentity services
+        builder.AddPingIdentityServices();
             
         return builder;
     }
@@ -442,6 +449,21 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddLogging(loggingBuilder => {
             loggingBuilder.AddSerilog(dispose: true);
         });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Add Ping Identity services to the web application.
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns><see cref="WebApplicationBuilder"/></returns>
+    public static WebApplicationBuilder AddPingIdentityServices(this WebApplicationBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        builder.Services.AddPingIdentityHttpClients(builder.Configuration);
+        builder.Services.AddPingIdentityServices(builder.Configuration);
 
         return builder;
     }
