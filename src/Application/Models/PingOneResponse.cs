@@ -126,6 +126,12 @@ public class Embedded
     /// </summary>
     [JsonPropertyName("devices")]
     public List<Device>? Devices { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of identity providers associated with PingOne.
+    /// </summary>
+    [JsonPropertyName("identityProviders")]
+    public List<PingOneIdentityProvider>? IdentityProviders { get; set; }
 }
 
 /// <summary>

@@ -58,9 +58,6 @@ public class PingOneHttpHandler : DelegatingHandler
     private async Task<HttpResponseMessage> PerformRequest(HttpRequestMessage request, 
         CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Setting the 'X-XSRF-Header' header before adding authorization headers");
-        request.Headers.Add("X-XSRF-Header", "PingOne");
-        
         _logger.LogDebug("Setting the 'Authorization' header before performing requests");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _tokenService.AccessToken);
         
@@ -79,7 +76,10 @@ public class PingOneHttpHandler : DelegatingHandler
             response = await base.SendAsync(request, cancellationToken);
         }   
         
-        response.EnsureSuccessStatusCode();
+        if (response.IsSuccessStatusCode is false)
+        {
+            _logger.LogError("Request for {Uri} Failed to perform request with status code {StatusCode}",request.RequestUri?.AbsoluteUri.ToString(), response.StatusCode);
+        }
         
         _logger.LogDebug("Completed performing the request");
         return response;

@@ -55,6 +55,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<ServiceNowUser> ServiceNowUsers => Set<ServiceNowUser>();
 
+    /// <summary>
+    /// Gets or sets all of the <see cref="ServiceNowGroup"/> entities in the context.
+    /// </summary>
+    public DbSet<AzureUsersSource> AzureUsersSources => Set<AzureUsersSource>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -143,6 +148,12 @@ public class ApplicationDbContext : DbContext
             .HasMany(s => s.AttributeContractFulfillment)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Readonly Identity Engine Tables
+        modelBuilder.Entity<AzureUsersSource>(entity =>
+        {
+            entity.HasNoKey();
+        });
         
         base.OnModelCreating(modelBuilder);
     }

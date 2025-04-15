@@ -1,7 +1,11 @@
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Constants;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Exceptions;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Configuration;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.PingOne;
@@ -33,20 +37,133 @@ public class PingOneService : IPingOneService
     }
 
     /// <inheritdoc/>
-    public Task<PingOneResponse> CreateLinkedAccountForLdapGateway(string userId)
+    public async Task<PingOneResponse> CreateLinkedAccountForLdapGateway(string pingOneUserId, string samAccountName)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNullOrEmpty(pingOneUserId);
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var ldapGatewayLinkingUrl = $"{_pingOneOptions.ApiBaseUrl}/environments/{_pingOneOptions.EnvironmentId}/users/{pingOneUserId}/password";
+        var requestBody = new
+        {
+            id = _pingOneOptions.LdapGatewayId,
+            userType = new
+            {
+                id = _pingOneOptions.LdapGatewayUserTypeId,
+            },
+            correlationAttributes = new
+            {
+                sAMAccountName = samAccountName
+            }
+        };
+
+        var ldapGatewayLinkingResponse = await _pingOneHttpClient.PostAsJsonAsync(ldapGatewayLinkingUrl, requestBody);
+        
+        if (ldapGatewayLinkingResponse.IsSuccessStatusCode is false)
+        {
+            _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, ldapGatewayLinkingResponse.StatusCode);
+            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {ldapGatewayLinkingResponse.StatusCode}");
+        }
+
+        var deserializedLdapGatewayLinkingResponse = await ldapGatewayLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedLdapGatewayLinkingResponse);
+        
+        _logger.LogInformation("Successfully linked LDAP Gateway account for user {UserId} with status code {StatusCode}", pingOneUserId, ldapGatewayLinkingResponse.StatusCode);
+        return deserializedLdapGatewayLinkingResponse;
     }
 
     /// <inheritdoc/>
-    public Task<PingOneResponse> CreateLinkedAccountForMicrosoftEntra(string userId)
+    public async Task<PingOneResponse> CreateLinkedAccountForMicrosoftEntra(string pingOneUserId, string microsoftObjectId)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNullOrEmpty(pingOneUserId);
+        ArgumentNullException.ThrowIfNullOrEmpty(microsoftObjectId);
+
+        var microsoftEamLinkingUrl = $"{_pingOneOptions.ApiBaseUrl}/environments/{_pingOneOptions.EnvironmentId}/users/{pingOneUserId}/linkedAccounts";
+        var requestBody = new
+        {
+            identityProvider = new
+            {
+                id = _pingOneOptions.MicrosoftEntraIdentityProviderId,
+            },
+            externalId = microsoftObjectId
+        };
+
+        var serializedJson = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(serializedJson, Encoding.UTF8, "application/vnd.pingidentity.account.link+json");
+        var microsoftEamLinkingResponse = await _pingOneHttpClient.PostAsync(microsoftEamLinkingUrl, content);
+        
+        if (microsoftEamLinkingResponse.IsSuccessStatusCode is false)
+        {
+            _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, microsoftEamLinkingResponse.StatusCode);
+            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {microsoftEamLinkingResponse.StatusCode}");
+        }
+
+        var deserializedMicrosoftEamLinkingResponse = await microsoftEamLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedMicrosoftEamLinkingResponse);
+
+        _logger.LogInformation("Successfully linked Microsft account for user {UserId} with status code {StatusCode}", pingOneUserId, microsoftEamLinkingResponse.StatusCode);
+        return deserializedMicrosoftEamLinkingResponse;
     }
 
     /// <inheritdoc/>
-    public Task<PingOneResponse> CreateLinkedAccountForPingFederate(string userId)
+    public async Task<PingOneResponse> CreateLinkedAccountForPingFederate(string pingOneUserId, string samAccountName)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNullOrEmpty(pingOneUserId);
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingFederateLinkingUrl = $"{_pingOneOptions.ApiBaseUrl}/environments/{_pingOneOptions.EnvironmentId}/users/{pingOneUserId}/linkedAccounts";
+        var requestBody = new
+        {
+            identityProvider = new
+            {
+                id = _pingOneOptions.PingFederateIdentityProviderId,
+            },
+            externalId = samAccountName
+        };
+
+        var serializedJson = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(serializedJson, Encoding.UTF8, "application/vnd.pingidentity.account.link+json");
+        var pingFederateLinkingResponse = await _pingOneHttpClient.PostAsync(pingFederateLinkingUrl, content);
+        
+        if (pingFederateLinkingResponse.IsSuccessStatusCode is false)
+        {
+            _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, pingFederateLinkingResponse.StatusCode);
+            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {pingFederateLinkingResponse.StatusCode}");
+        }
+
+        var deserializedPingFederateLinkingResponse = await pingFederateLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedPingFederateLinkingResponse);
+
+        _logger.LogInformation("Successfully linked PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, pingFederateLinkingResponse.StatusCode);
+        return deserializedPingFederateLinkingResponse;
+    }
+
+    /// <inheritdoc/>
+    public async Task<string> GetPingOneUserIdFromSamAccountName(string samAccountName)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingOneUserIdUrl = $"{_pingOneOptions.ApiBaseUrl}/environments/{_pingOneOptions.EnvironmentId}/users?filter=username eq \"{samAccountName}\"";
+        var pingOneUserIdResponse = await _pingOneHttpClient.GetAsync(pingOneUserIdUrl);
+        pingOneUserIdResponse.EnsureSuccessStatusCode();
+
+        var deserializedPingOneUserIdResponse = await pingOneUserIdResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        var userId = deserializedPingOneUserIdResponse?.Embedded?.Users?.SingleOrDefault()?.Id;
+        ArgumentNullException.ThrowIfNullOrEmpty(userId);
+
+        return userId;
+    }
+
+    /// <inheritdoc/>
+    public async Task<PingOneResponse> GetExternalIdps()
+    {
+        var apiBaseUrl = _pingOneOptions.ApiBaseUrl?.TrimEnd('/');
+        var environmentId = _pingOneOptions.EnvironmentId;
+        var externalIdpsEndpoint = $"{apiBaseUrl}/environments/{environmentId}/identityProviders";
+
+        var externalIdpsResponse = await _pingOneHttpClient.GetAsync(externalIdpsEndpoint);
+        var deserializedExternalIdpResponse = await externalIdpsResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedExternalIdpResponse);
+
+        return deserializedExternalIdpResponse;
     }
 }

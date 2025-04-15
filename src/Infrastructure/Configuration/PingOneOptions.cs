@@ -36,4 +36,24 @@ public class PingOneOptions
     /// Gets or sets the trust server SSL certificate.
     /// </summary>
     public bool TrustServerSslCertificate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the PingFederate identity provider ID.
+    /// </summary>
+    public string? PingFederateIdentityProviderId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Microsoft Entra identity provider ID.
+    /// </summary>
+    public string? MicrosoftEntraIdentityProviderId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the LDAP Gateway ID.
+    /// </summary>
+    public string? LdapGatewayId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the LDAP Gateway user type ID.
+    /// </summary>
+    public string? LdapGatewayUserTypeId { get; set; }
 }

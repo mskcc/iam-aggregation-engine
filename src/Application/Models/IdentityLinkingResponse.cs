@@ -5,4 +5,8 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
 /// </summary>
 public class IdentityLinkingResponse
 {
+    /// <summary>
+    /// The PingOne response associated with account linking.
+    /// </summary>
+    public PingOneResponse? PingOneResponse { get; set; }
 }

@@ -73,6 +73,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddKeyedTransient<IColleague, GetServiceNowUsersColleague>(ServiceKeys.GetServiceNowUsersColleague);
         builder.Services.AddKeyedTransient<IColleague, PurgeServiceNowUsersColleague>(ServiceKeys.PurgeServiceNowUsersColleague);
 
+        builder.Services.AddKeyedTransient<IColleague, IdentityLinkingColleague>(ServiceKeys.IdentityLinkingColleague);
+
         // Register Notifications
         builder.Services.AddTransient<NotifyPurgeOidcColleague>();
         builder.Services.AddTransient<NotifyAggregateOidcConnectionsColleague>();
@@ -94,6 +96,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddTransient<NotifyAggregateServiceNowUsersColleague>();
         builder.Services.AddTransient<NotifyGetServiceNowUsersColleague>();
         builder.Services.AddTransient<NotifyPurgeServiceNowUsersColleague>();
+
+        builder.Services.AddTransient<NotifyIdentityLinkingColleague>();
 
         return builder;
     }
