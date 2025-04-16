@@ -66,6 +66,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<AzureUsersSource> AzureUsersSources => Set<AzureUsersSource>();
 
+    /// <summary>
+    /// Gets or sets all of the <see cref="IdentityLinkingProcessingReqeustQueue"/> entities in the context.
+    /// </summary>
+    public DbSet<IdentityLinkingProcessingReqeustQueue> IdentityLinkingProcessingReqeustQueues => Set<IdentityLinkingProcessingReqeustQueue>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
