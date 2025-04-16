@@ -66,4 +66,9 @@ public class IdentityLinkingProcessingReqeustQueue
     /// The source of which the identity linking processing request came from.
     /// </summary>
     public string? Source { get; set; }
+
+    /// <summary>
+    /// Idicator of whether the identity linking processing request was processed or not.
+    /// </summary>
+    public bool IsProcessedSuccessfully { get; set; } = false;
 }
