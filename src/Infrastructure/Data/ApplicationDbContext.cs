@@ -71,6 +71,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<IdentityLinkingProcessingReqeustQueue> IdentityLinkingProcessingReqeustQueues => Set<IdentityLinkingProcessingReqeustQueue>();
 
+    /// <summary>
+    /// Gets or sets all of the <see cref="IdentityLinkingProcessingReqeustQueue"/> entities in the context.
+    /// </summary>
+    public DbSet<IdentityLinkingProcessingReqeustArchive> IdentityLinkingProcessingReqeustArchives => Set<IdentityLinkingProcessingReqeustArchive>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
