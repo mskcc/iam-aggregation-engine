@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities;
 
 [Keyless]
-[Table("AzureUsers_Source_Stage")]
 public class AzureUsersSource
 {
     /// <summary>

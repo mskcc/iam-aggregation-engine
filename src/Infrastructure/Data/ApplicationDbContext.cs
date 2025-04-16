@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Configuration;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
 
@@ -10,6 +12,7 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
 public class ApplicationDbContext : DbContext
 {
     private readonly ILogger<ApplicationDbContext> _logger;
+    private readonly ApiOptions _apiOptions;
 
     /// <summary>
     /// Creates an instance of <see cref="ApplicationDbContext"/>
@@ -17,12 +20,15 @@ public class ApplicationDbContext : DbContext
     /// <param name="options"></param>
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options,
+        IOptionsMonitor<ApiOptions> apiOptions,
         ILogger<ApplicationDbContext> logger) : base(options) 
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(apiOptions);
 
         _logger = logger;
+        _apiOptions = apiOptions.CurrentValue;
     }
     
     /// <summary>
@@ -153,6 +159,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<AzureUsersSource>(entity =>
         {
             entity.HasNoKey();
+            entity.ToTable(_apiOptions.AzureUsersSourceTableName);
         });
         
         base.OnModelCreating(modelBuilder);

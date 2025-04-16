@@ -149,4 +149,9 @@ public class ApiOptions
     /// Options for the Hangfire dashboard read-only mode.
     /// </summary>
     public bool HangfireDashboardIsReadOnly { get; set; }
+
+    /// <summary>
+    /// Options for the name of the table to get azure users from in the configured database.
+    /// </summary>
+    public string? AzureUsersSourceTableName { get; set; }
 }
