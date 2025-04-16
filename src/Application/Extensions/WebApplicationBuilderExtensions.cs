@@ -431,33 +431,6 @@ public static class WebApplicationBuilderExtensions
     }
 
     /// <summary>
-    /// Adds logging use serilog.
-    /// Documentation can be found here: https://github.com/serilog/serilog-extensions-logging
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static WebApplicationBuilder AddSerilogLogging(this WebApplicationBuilder builder)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-
-        var apiOptions = builder.Configuration.GetSection(ApiOptions.SectionKey).Get<ApiOptions>();
-        ArgumentNullException.ThrowIfNull(apiOptions);
-
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("logs/log-.txt", 
-                rollingInterval: RollingInterval.Day, 
-                outputTemplate: "{Timestamp:HH:mm} [{Level}] ({ThreadId}) {Message}{NewLine}{Exception}",
-                retainedFileCountLimit: apiOptions.LoggingRetentionDays)
-            .CreateLogger();
-
-        builder.Services.AddLogging(loggingBuilder => {
-            loggingBuilder.AddSerilog(dispose: true);
-        });
-
-        return builder;
-    }
-
-    /// <summary>
     /// Add Ping Identity services to the web application.
     /// </summary>
     /// <param name="builder"></param>
