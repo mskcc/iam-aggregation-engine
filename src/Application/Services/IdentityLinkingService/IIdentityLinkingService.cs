@@ -14,12 +14,14 @@ public interface IIdentityLinkingService
     /// <summary>
     /// Links the Entra ID identity in PingOne.
     /// </summary>
+    /// <param name="samAccountName"></param>
     /// <returns>Task of <see cref="IdentityLinkingResponse"/></returns>
     Task<IdentityLinkingResponse> LinkIdentityFromEntraId(string samAccountName);
 
     /// <summary>
     /// Links the LDAP identity in PingOne.
     /// </summary>
+    /// <param name="samAccountName"></param>
     /// <returns>Task of <see cref="IdentityLinkingResponse"/></returns>
-    Task<IdentityLinkingResponse> LinkIdentityFromLdapGateway();
+    Task<IdentityLinkingResponse> LinkIdentityFromLdapGateway(string samAccountName);
 }

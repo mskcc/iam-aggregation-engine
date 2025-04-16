@@ -56,7 +56,9 @@ public class PingOneService : IPingOneService
             }
         };
 
-        var ldapGatewayLinkingResponse = await _pingOneHttpClient.PostAsJsonAsync(ldapGatewayLinkingUrl, requestBody);
+        var serializedJson = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(serializedJson, Encoding.UTF8, "application/vnd.pingidentity.password.setGateway+json");
+        var ldapGatewayLinkingResponse = await _pingOneHttpClient.PutAsync(ldapGatewayLinkingUrl, content);
         
         if (ldapGatewayLinkingResponse.IsSuccessStatusCode is false)
         {

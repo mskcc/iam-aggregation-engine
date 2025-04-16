@@ -44,9 +44,17 @@ public class IdentityLinkingService : IIdentityLinkingService
     }
 
     /// <inheritdoc/>
-    public Task<IdentityLinkingResponse> LinkIdentityFromLdapGateway()
+    public async Task<IdentityLinkingResponse> LinkIdentityFromLdapGateway(string samAccountName)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingOneUserId = await _pingOneService.GetPingOneUserIdFromSamAccountName(samAccountName);
+        var pingOneAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForLdapGateway(pingOneUserId, samAccountName);
+        
+        return new IdentityLinkingResponse
+        {
+            PingOneResponse = pingOneAccountLinkingResponse
+        };    
     }
 
     /// <inheritdoc/>
@@ -59,7 +67,7 @@ public class IdentityLinkingService : IIdentityLinkingService
         
         return new IdentityLinkingResponse
         {
-            PingOneResponse = pingOneAccountLinkingResponse,
+            PingOneResponse = pingOneAccountLinkingResponse
         };
     }
 
