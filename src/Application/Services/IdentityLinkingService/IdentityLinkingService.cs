@@ -27,7 +27,7 @@ public class IdentityLinkingService : IIdentityLinkingService
         _pingOneService = pingOneService;
         _azureUsersSource = applicationDbContext.Set<AzureUsersSource>();
     }
-    
+
     /// <inheritdoc/>
     public async Task<IdentityLinkingResponse> LinkIdentityFromEntraId(string samAccountName)
     {
@@ -69,6 +69,20 @@ public class IdentityLinkingService : IIdentityLinkingService
         {
             PingOneResponse = pingOneAccountLinkingResponse
         };
+    }
+
+    /// <inheritdoc/>
+    public Task<IdentityLinkingResponse> JustInTimeProcessInBulk()
+    {
+        // TODO: Make this available via API. 
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<IdentityLinkingResponse> ProcessInBulk()
+    {
+        // TODO: Make this a recurring job on a schedule.
+        throw new NotImplementedException();
     }
 
     private async Task<string> GetMicrosoftObjectId(string samAccountName)
