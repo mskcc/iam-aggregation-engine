@@ -154,4 +154,9 @@ public class ApiOptions
     /// Options for the name of the table to get azure users from in the configured database.
     /// </summary>
     public string? AzureUsersSourceTableName { get; set; }
+
+    /// <summary>
+    /// Options for the name of the table to get identity processing requests from in the configured database.
+    /// </summary>
+    public int BulkProcessingBatchSize { get; set; }
 }

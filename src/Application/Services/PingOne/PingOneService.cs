@@ -168,4 +168,18 @@ public class PingOneService : IPingOneService
 
         return deserializedExternalIdpResponse;
     }
+
+    /// <inheritdoc/>
+    public async Task<PingOneResponse> GetPingOneIdentitiesForProcessing()
+    {
+        var apiBaseUrl = _pingOneOptions.ApiBaseUrl?.TrimEnd('/');
+        var environmentId = _pingOneOptions.EnvironmentId;
+        var usersEndpoint = $"{apiBaseUrl}/environments/{environmentId}/users";
+
+        var usersResponse = await _pingOneHttpClient.GetAsync(usersEndpoint);
+        var deserializedUsersResponse = await usersResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedUsersResponse);
+
+        return deserializedUsersResponse;
+    }
 }

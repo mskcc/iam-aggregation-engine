@@ -40,4 +40,10 @@ public interface IPingOneService
     /// <param name="userId"></param>
     /// <returns></returns>
     Task<PingOneResponse> GetExternalIdps();
+
+    /// <summary>
+    /// Gets all identites configured for processing in PingOne via API.
+    /// </summary>
+    /// <returns></returns>
+    Task<PingOneResponse> GetPingOneIdentitiesForProcessing();
 }

@@ -78,6 +78,11 @@ public class IdentityLinkingColleague : IColleague
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromLdapGateway(samAccountName));
         }
 
+        if (payload?.NotificationType is nameof(BatchIdentityLinkingNotification))
+        {
+             _backgroundJobClient.Enqueue(() => _identityLinkingService.ProcessInBulk());
+        }
+
         _logger.LogDebug("Identty Linking Colleague Receives: {message}", serviceKey);
 
         return Task.FromResult<object>(new Response<IdentityLinkingResponse>()

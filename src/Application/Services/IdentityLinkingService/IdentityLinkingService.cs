@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.PingOne;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Configuration;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Extensions;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.IdentityLinkingService;
 
@@ -12,20 +15,28 @@ public class IdentityLinkingService : IIdentityLinkingService
     private readonly ILogger<IdentityLinkingService> _logger;
     private readonly IPingOneService _pingOneService;
     private readonly DbSet<AzureUsersSource> _azureUsersSource;
+    private readonly DbSet<IdentityLinkingProcessingReqeustQueue> _identityProcessingRequestQueue;
+    private readonly DbSet<IdentityLinkingProcessingReqeustArchive> _identityProcessingRequestArchive;
+    private readonly ApiOptions _apiOptions;
 
     public IdentityLinkingService(
         ILogger<IdentityLinkingService> logger,
         IPingOneService pingOneService,
-        ApplicationDbContext applicationDbContext
+        ApplicationDbContext applicationDbContext,
+        IOptionsMonitor<ApiOptions> apiOptionsMonitor
     )
     {
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(pingOneService);
         ArgumentNullException.ThrowIfNull(applicationDbContext);
+        ArgumentNullException.ThrowIfNull(apiOptionsMonitor);
 
         _logger = logger;
         _pingOneService = pingOneService;
         _azureUsersSource = applicationDbContext.Set<AzureUsersSource>();
+        _identityProcessingRequestQueue = applicationDbContext.Set<IdentityLinkingProcessingReqeustQueue>();
+        _identityProcessingRequestArchive = applicationDbContext.Set<IdentityLinkingProcessingReqeustArchive>();
+        _apiOptions = apiOptionsMonitor.Get(ApiOptions.SectionKey);
     }
 
     /// <inheritdoc/>
@@ -72,17 +83,125 @@ public class IdentityLinkingService : IIdentityLinkingService
     }
 
     /// <inheritdoc/>
-    public Task<IdentityLinkingResponse> JustInTimeProcessInBulk()
+    public async Task<IdentityLinkingResponse> JustInTimeProcessInBulk()
     {
         // TODO: Make this available via API. 
-        throw new NotImplementedException();
+        var pingOneUsersResponse = await _pingOneService.GetPingOneIdentitiesForProcessing();
+        var identitiesForProcessing = pingOneUsersResponse.Embedded?.Users;
+        ArgumentNullException.ThrowIfNull(identitiesForProcessing);
+
+        foreach(var identity in identitiesForProcessing)
+        {
+            if (string.IsNullOrEmpty(identity.Username))
+            {
+                _logger.LogError("Just In Time Identity Linking - PingOneUserId is null or empty for pingOneUserId: {PingOneUserId}", identity.Id);
+                continue;
+            }
+
+            var pingFederateIdentityLinkingResponse = await LinkIdentityFromPingFederate(identity.Username);
+            if (pingFederateIdentityLinkingResponse is null)
+            {
+                _logger.LogError("Just In Time Identity Linking - PingOneAccountLinkingResponse is null for samAccountName: {SamAccountName}", identity.Username);
+                continue;
+            }
+
+            var entraIdentityLinkingResponse = await LinkIdentityFromEntraId(identity.Username);
+            if (entraIdentityLinkingResponse is null)
+            {
+                _logger.LogError("Just In Time Identity Linking - EntraAccountLinkingResponse is null for samAccountName: {SamAccountName}", identity.Username);
+                continue;
+            }
+
+            var ldapGatewayIdentityLinkingResponse = await LinkIdentityFromLdapGateway(identity.Username);
+            if (ldapGatewayIdentityLinkingResponse is null)
+            {
+                _logger.LogError("Just In Time Identity Linking - LdapGatewayAccountLinkingResponse is null for samAccountName: {SamAccountName}", identity.Username);
+                continue;
+            }
+        }
+
+        _logger.LogInformation("Just In Time Identity Linking - Successfully linked PingFederate, Entra, and LDAP Gateway accounts.");
+        
+        return new IdentityLinkingResponse
+        {
+            PingOneResponse = null,
+            IsBulkProcessingJob = false,
+            IsBulkJustInTimeProcessingJob = true,
+            IsBulkProcessingSuccessful = true
+        };
     }
 
     /// <inheritdoc/>
-    public Task<IdentityLinkingResponse> ProcessInBulk()
+    public async Task<IdentityLinkingResponse> ProcessInBulk()
     {
+        // TODO: Make this available via API.
         // TODO: Make this a recurring job on a schedule.
-        throw new NotImplementedException();
+        var requestedIdentitiesForProcessing = _identityProcessingRequestQueue
+            .Where(x => x.Status != "Completed")
+            .Take(_apiOptions.BulkProcessingBatchSize)
+            .ToList();
+
+        foreach (var requestedIdentity in requestedIdentitiesForProcessing)
+        {
+            var pingOneUserId = requestedIdentity.PingOneUserId;
+            var samAccountName = requestedIdentity.SamAccountName;
+            var entraObjectId = requestedIdentity.EntraObjectId;
+
+            if (string.IsNullOrEmpty(pingOneUserId))
+            {
+                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneUserId is null or empty for pingOneUserId", requestedIdentity.Id);
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(samAccountName))
+            {
+                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneUserId is null or empty for samAccountName", requestedIdentity.Id);
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(entraObjectId))
+            {
+                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneUserId is null or empty for entraObjectId", requestedIdentity.Id);
+                continue;
+            }
+
+            var pingFederateAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForPingFederate(pingOneUserId, samAccountName);
+            if (pingFederateAccountLinkingResponse is null)
+            {
+                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneAccountLinkingResponse is null for samAccountName: {SamAccountName}", 
+                    requestedIdentity.Id, samAccountName);
+                continue;
+            }
+
+            var entraAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForMicrosoftEntra(pingOneUserId, entraObjectId);
+            if (entraAccountLinkingResponse is null)
+            {
+                _logger.LogErrorToSql("RequestId: {ReqeustId} EntraAccountLinkingResponse is null for samAccountName: {SamAccountName}", 
+                    requestedIdentity.Id, samAccountName);
+                continue;
+            }
+
+            var ldapGatewayLinkingResponse = await _pingOneService.CreateLinkedAccountForLdapGateway(pingOneUserId, samAccountName);
+            if (ldapGatewayLinkingResponse is null)
+            {
+                _logger.LogErrorToSql("RequestId: {ReqeustId} EntraAccountLinkingResponse is null for samAccountName: {SamAccountName}", 
+                    requestedIdentity.Id, samAccountName);
+                continue;
+            }
+
+            _logger.LogInformationToSql("RequestId: {ReqeustId} Successfully linked PingFederate, Entra, and LDAP Gateway accounts for samAccountName: {SamAccountName}", 
+                requestedIdentity.Id, samAccountName);
+
+            // TODO: Write identity to archive table and update queue table to completed.
+        }
+        
+        return new IdentityLinkingResponse
+        {
+            PingOneResponse = null,
+            IsBulkProcessingJob = true,
+            IsBulkJustInTimeProcessingJob = false,
+            IsBulkProcessingSuccessful = true
+        };
     }
 
     private async Task<string> GetMicrosoftObjectId(string samAccountName)
