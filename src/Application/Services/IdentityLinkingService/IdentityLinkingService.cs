@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
@@ -17,23 +18,35 @@ public class IdentityLinkingService : IIdentityLinkingService
     private readonly DbSet<AzureUsersSource> _azureUsersSource;
     private readonly ApplicationDbContext _applicationDbContext;
     private readonly ApiOptions _apiOptions;
+    private readonly IHostEnvironment _hostEnvironment;
 
+    /// <summary>
+    /// Creates an instance of <see cref="IdentityLinkingService"/>
+    /// </summary>
+    /// <param name="logger"></param>
+    /// <param name="pingOneService"></param>
+    /// <param name="applicationDbContext"></param>
+    /// <param name="apiOptionsMonitor"></param>
+    /// <param name="hostEnvironment"></param>
     public IdentityLinkingService(
         ILogger<IdentityLinkingService> logger,
         IPingOneService pingOneService,
         ApplicationDbContext applicationDbContext,
-        IOptionsMonitor<ApiOptions> apiOptionsMonitor
+        IOptionsMonitor<ApiOptions> apiOptionsMonitor,
+        IHostEnvironment hostEnvironment
     )
     {
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(pingOneService);
         ArgumentNullException.ThrowIfNull(applicationDbContext);
         ArgumentNullException.ThrowIfNull(apiOptionsMonitor);
+        ArgumentNullException.ThrowIfNull(hostEnvironment);
 
         _logger = logger;
         _pingOneService = pingOneService;
         _applicationDbContext = applicationDbContext;
         _apiOptions = apiOptionsMonitor.Get(ApiOptions.SectionKey);
+        _hostEnvironment = hostEnvironment;
 
         _azureUsersSource = applicationDbContext.Set<AzureUsersSource>(_apiOptions.AzureUsersSourceTableName!);
     }
@@ -133,7 +146,6 @@ public class IdentityLinkingService : IIdentityLinkingService
     /// <inheritdoc/>
     public async Task<IdentityLinkingResponse> ProcessInBulk()
     {
-        // TODO: Make this available via API.
         // TODO: Make this a recurring job on a schedule.
         var identityProcessingRequestQueueDbSet = _applicationDbContext.Set<IdentityLinkingProcessingReqeustQueue>();
         var identityLinkingProcessingReqeustArchiveDbSet = _applicationDbContext.Set<IdentityLinkingProcessingReqeustArchive>();
@@ -153,48 +165,99 @@ public class IdentityLinkingService : IIdentityLinkingService
 
             if (string.IsNullOrEmpty(pingOneUserId))
             {
-                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneUserId is null or empty for pingOneUserId", requestedIdentity.Id);
+                _logger.LogErrorToSql(
+                    logMessage: $"RequestId: {requestedIdentity.Id} pingOneUserId is null.",
+                    args: null,
+                    requestId: requestedIdentity.Id.ToString(),
+                    pingOneUserId: string.Empty,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "PingOneUserId is null");
+
                 continue;
             }
 
             if (string.IsNullOrEmpty(samAccountName))
             {
-                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneUserId is null or empty for samAccountName", requestedIdentity.Id);
+                _logger.LogErrorToSql(
+                    logMessage: $"RequestId: {requestedIdentity.Id} samAccountName is null.",
+                    args: null,
+                    requestId: requestedIdentity.Id.ToString(),
+                    pingOneUserId: pingOneUserId,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "SamAccountName is null");
+
                 continue;
             }
 
             if (string.IsNullOrEmpty(entraObjectId))
             {
-                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneUserId is null or empty for entraObjectId", requestedIdentity.Id);
+                _logger.LogErrorToSql(
+                    logMessage: $"RequestId: {requestedIdentity.Id} entraObjectId is null.",
+                    args: null,
+                    requestId: requestedIdentity.Id.ToString(),
+                    pingOneUserId: pingOneUserId,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "EntraObjectId is null");
+
                 continue;
             }
 
             var pingFederateAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForPingFederate(pingOneUserId, samAccountName);
             if (pingFederateAccountLinkingResponse is null)
             {
-                _logger.LogErrorToSql("RequestId: {ReqeustId} PingOneAccountLinkingResponse is null for samAccountName: {SamAccountName}", 
-                    requestedIdentity.Id, samAccountName);
+                _logger.LogErrorToSql(
+                    logMessage: $"RequestId: {requestedIdentity.Id} PingOneAccountLinkingResponse is null for samAccountName: {samAccountName}",
+                    args: null,
+                    requestId: requestedIdentity.Id.ToString(),
+                    pingOneUserId: pingOneUserId,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "PingOneAccountLinkingResponse is null");
+
                 continue;
             }
 
             var entraAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForMicrosoftEntra(pingOneUserId, entraObjectId);
             if (entraAccountLinkingResponse is null)
             {
-                _logger.LogErrorToSql("RequestId: {ReqeustId} EntraAccountLinkingResponse is null for samAccountName: {SamAccountName}", 
-                    requestedIdentity.Id, samAccountName);
+                _logger.LogErrorToSql(
+                    logMessage: $"RequestId: {requestedIdentity.Id} entraAccountLinkingResponse is null for samAccountName: {samAccountName}",
+                    args: null,
+                    requestId: requestedIdentity.Id.ToString(),
+                    pingOneUserId: pingOneUserId,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "EntraAccountLinkingResponse is null");
+
                 continue;
             }
 
             var ldapGatewayLinkingResponse = await _pingOneService.CreateLinkedAccountForLdapGateway(pingOneUserId, samAccountName);
             if (ldapGatewayLinkingResponse is null)
             {
-                _logger.LogErrorToSql("RequestId: {ReqeustId} EntraAccountLinkingResponse is null for samAccountName: {SamAccountName}", 
-                    requestedIdentity.Id, samAccountName);
+                _logger.LogErrorToSql(
+                    logMessage: $"RequestId: {requestedIdentity.Id} ldapGatewayLinkingResponse is null for samAccountName: {samAccountName}",
+                    args: null,
+                    requestId: requestedIdentity.Id.ToString(),
+                    pingOneUserId: pingOneUserId,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "LdapGatewayLinkingResponse is null");
+
                 continue;
             }
 
-            _logger.LogInformationToSql("RequestId: {ReqeustId} Successfully linked PingFederate, Entra, and LDAP Gateway accounts for samAccountName: {SamAccountName}", 
-                requestedIdentity.Id, samAccountName);
+            _logger.LogErrorToSql(
+                logMessage: $"RequestId: {requestedIdentity.Id} Successfully linked PingFederate, Entra, and LDAP Gateway accounts for samAccountName: {samAccountName}",
+                args: null,
+                requestId: requestedIdentity.Id.ToString(),
+                pingOneUserId: pingOneUserId,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Success",
+                detail: string.Empty);
 
             requestedIdentity.Status = "Completed";
             requestedIdentity.Attempts = requestedIdentity.Attempts + 1;
