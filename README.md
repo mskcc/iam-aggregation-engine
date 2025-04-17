@@ -87,6 +87,9 @@ Once the application is running, you can also access the **Hangfire Dashboard** 
 
 ## Creating Database Migrations
 Example of creating an InitialCreate migration. Run this the ```/src/Api``` directory.
+connection string must be configured in the appsettings.json or appsettings.development.json file that your environment is pointing too. 
+If you see an error similar to this: ```Format of the initialization string does not conform to specification starting at index 0```
+This is an indication that there is a configuration issue during ef miggrations. First place to check is appsettings.
 ```bash
 dotnet ef migrations add InitialCreate --output-dir ../Infrastructure/Data/Migrations --project ../Infrastructure/Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.csproj
 ```
