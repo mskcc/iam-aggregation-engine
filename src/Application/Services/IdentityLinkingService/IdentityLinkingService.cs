@@ -15,8 +15,7 @@ public class IdentityLinkingService : IIdentityLinkingService
     private readonly ILogger<IdentityLinkingService> _logger;
     private readonly IPingOneService _pingOneService;
     private readonly DbSet<AzureUsersSource> _azureUsersSource;
-    private readonly DbSet<IdentityLinkingProcessingReqeustQueue> _identityProcessingRequestQueue;
-    private readonly DbSet<IdentityLinkingProcessingReqeustArchive> _identityProcessingRequestArchive;
+    private readonly ApplicationDbContext _applicationDbContext;
     private readonly ApiOptions _apiOptions;
 
     public IdentityLinkingService(
@@ -33,10 +32,10 @@ public class IdentityLinkingService : IIdentityLinkingService
 
         _logger = logger;
         _pingOneService = pingOneService;
-        _azureUsersSource = applicationDbContext.Set<AzureUsersSource>();
-        _identityProcessingRequestQueue = applicationDbContext.Set<IdentityLinkingProcessingReqeustQueue>();
-        _identityProcessingRequestArchive = applicationDbContext.Set<IdentityLinkingProcessingReqeustArchive>();
+        _applicationDbContext = applicationDbContext;
         _apiOptions = apiOptionsMonitor.Get(ApiOptions.SectionKey);
+
+        _azureUsersSource = applicationDbContext.Set<AzureUsersSource>(_apiOptions.AzureUsersSourceTableName!);
     }
 
     /// <inheritdoc/>
@@ -136,8 +135,13 @@ public class IdentityLinkingService : IIdentityLinkingService
     {
         // TODO: Make this available via API.
         // TODO: Make this a recurring job on a schedule.
-        var requestedIdentitiesForProcessing = _identityProcessingRequestQueue
+        var identityProcessingRequestQueueDbSet = _applicationDbContext.Set<IdentityLinkingProcessingReqeustQueue>();
+        var identityLinkingProcessingReqeustArchiveDbSet = _applicationDbContext.Set<IdentityLinkingProcessingReqeustArchive>();
+
+        var requestedIdentitiesForProcessing = identityProcessingRequestQueueDbSet
             .Where(x => x.Status != "Completed")
+            .AsSplitQuery()
+            .OrderBy(r => r.Id)
             .Take(_apiOptions.BulkProcessingBatchSize)
             .ToList();
 
@@ -192,8 +196,23 @@ public class IdentityLinkingService : IIdentityLinkingService
             _logger.LogInformationToSql("RequestId: {ReqeustId} Successfully linked PingFederate, Entra, and LDAP Gateway accounts for samAccountName: {SamAccountName}", 
                 requestedIdentity.Id, samAccountName);
 
-            // TODO: Write identity to archive table and update queue table to completed.
+            requestedIdentity.Status = "Completed";
+            requestedIdentity.Attempts = requestedIdentity.Attempts + 1;
+            requestedIdentity.LastProcessingAttempt = DateTime.UtcNow;
+
+            var identityLinkingProcessingReqeustArchive = new IdentityLinkingProcessingReqeustArchive
+            {
+                SamAccountName = requestedIdentity.SamAccountName,
+                PingOneUserId = requestedIdentity.PingOneUserId,
+                EntraObjectId = requestedIdentity.EntraObjectId,
+                Status = requestedIdentity.Status,
+                Attempts = requestedIdentity.Attempts,
+                LastProcessingAttempt = requestedIdentity.LastProcessingAttempt
+            };
+            await identityLinkingProcessingReqeustArchiveDbSet.AddAsync(identityLinkingProcessingReqeustArchive);
         }
+
+        await _applicationDbContext.SaveChangesAsync();
         
         return new IdentityLinkingResponse
         {

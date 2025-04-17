@@ -62,11 +62,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<ServiceNowUser> ServiceNowUsers => Set<ServiceNowUser>();
 
     /// <summary>
-    /// Gets or sets all of the <see cref="ServiceNowGroup"/> entities in the context.
-    /// </summary>
-    public DbSet<AzureUsersSource> AzureUsersSources => Set<AzureUsersSource>();
-
-    /// <summary>
     /// Gets or sets all of the <see cref="IdentityLinkingProcessingReqeustQueue"/> entities in the context.
     /// </summary>
     public DbSet<IdentityLinkingProcessingReqeustQueue> IdentityLinkingProcessingReqeustQueues => Set<IdentityLinkingProcessingReqeustQueue>();
@@ -164,13 +159,6 @@ public class ApplicationDbContext : DbContext
             .HasMany(s => s.AttributeContractFulfillment)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Readonly Identity Engine Tables
-        modelBuilder.Entity<AzureUsersSource>(entity =>
-        {
-            entity.HasNoKey();
-            entity.ToTable(_apiOptions.AzureUsersSourceTableName);
-        });
         
         base.OnModelCreating(modelBuilder);
     }
