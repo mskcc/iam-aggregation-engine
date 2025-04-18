@@ -182,4 +182,76 @@ public class PingOneService : IPingOneService
 
         return deserializedUsersResponse;
     }
+
+    /// <inheritdoc/>
+    public async Task<PingOneResponse> GetLinkedIdentityProviderAccounts(string pingOneUserId)
+    {
+        var apiBaseUrl = _pingOneOptions.ApiBaseUrl?.TrimEnd('/');
+        var environmentId = _pingOneOptions.EnvironmentId;
+        var linkedAccountsEndpoint = $"{apiBaseUrl}/environments/{environmentId}/users/{pingOneUserId}/linkedAccounts";
+
+        var linkedAccountsResponse = await _pingOneHttpClient.GetAsync(linkedAccountsEndpoint);
+        var deserializedLinkedAccountsResponse = await linkedAccountsResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedLinkedAccountsResponse);
+
+        return deserializedLinkedAccountsResponse;
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> UnlinkIdentityProivder(string pingOneUserId, string linkedAccountId)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(pingOneUserId);
+        ArgumentNullException.ThrowIfNullOrEmpty(linkedAccountId);
+
+        var unlinkIdentityProviderUrl = $"{_pingOneOptions.ApiBaseUrl}/environments/{_pingOneOptions.EnvironmentId}/users/{pingOneUserId}/linkedAccounts/{linkedAccountId}";
+        _pingOneHttpClient.DefaultRequestHeaders.Add("Accept", "*/*");
+        var unlinkIdentityProviderResponse = await _pingOneHttpClient.DeleteAsync(unlinkIdentityProviderUrl);
+
+        if (unlinkIdentityProviderResponse.StatusCode is not System.Net.HttpStatusCode.NoContent)
+        {
+            _logger.LogError("Failed to ulink Identity Provider account for user {UserId} with status code {StatusCode}", pingOneUserId, unlinkIdentityProviderResponse.StatusCode);
+            throw new IdentityLinkingException($"Failed to unlink Identity Provider accounts for user {pingOneUserId} with status code {unlinkIdentityProviderResponse.StatusCode}");
+        }
+
+        _logger.LogInformation("Successfully unlinked Identity Provider account for user {UserId} with status code {StatusCode}", pingOneUserId, unlinkIdentityProviderResponse.StatusCode);
+
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public async Task<PingOneResponse> UnlinkLdapGatewayIdentity(string pingOneUserId, string samAccountName)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(pingOneUserId);
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var ldapGatewayLinkingUrl = $"{_pingOneOptions.ApiBaseUrl}/environments/{_pingOneOptions.EnvironmentId}/users/{pingOneUserId}/password";
+        var requestBody = new
+        {
+            id = string.Empty,
+            userType = new
+            {
+                id = string.Empty,
+            },
+            correlationAttributes = new
+            {
+                sAMAccountName = samAccountName
+            }
+        };
+
+        var serializedJson = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(serializedJson, Encoding.UTF8, "application/vnd.pingidentity.password.setGateway+json");
+        var ldapGatewayLinkingResponse = await _pingOneHttpClient.PutAsync(ldapGatewayLinkingUrl, content);
+        
+        if (ldapGatewayLinkingResponse.IsSuccessStatusCode is false)
+        {
+            _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, ldapGatewayLinkingResponse.StatusCode);
+            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {ldapGatewayLinkingResponse.StatusCode}");
+        }
+
+        var deserializedLdapGatewayLinkingResponse = await ldapGatewayLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();
+        ArgumentNullException.ThrowIfNull(deserializedLdapGatewayLinkingResponse);
+        
+        _logger.LogInformation("Successfully linked LDAP Gateway account for user {UserId} with status code {StatusCode}", pingOneUserId, ldapGatewayLinkingResponse.StatusCode);
+        return deserializedLdapGatewayLinkingResponse;
+    }
 }

@@ -132,6 +132,12 @@ public class Embedded
     /// </summary>
     [JsonPropertyName("identityProviders")]
     public List<PingOneIdentityProvider>? IdentityProviders { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of linked accounts associated with the user.
+    /// </summary>
+    [JsonPropertyName("linkedAccounts")]
+    public List<LinkedAccountJson>? LinkedAccounts { get; set; }
 }
 
 /// <summary>

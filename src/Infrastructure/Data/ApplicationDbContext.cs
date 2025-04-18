@@ -159,6 +159,13 @@ public class ApplicationDbContext : DbContext
             .HasMany(s => s.AttributeContractFulfillment)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Identity Linking Table Dependencies
+        modelBuilder.Entity<AzureUsersSource>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToTable(_apiOptions.AzureUsersSourceTableName);
+        });
         
         base.OnModelCreating(modelBuilder);
     }

@@ -43,4 +43,11 @@ public interface IIdentityLinkingService
     /// </remarks>
     /// <returns></returns>
     Task<IdentityLinkingResponse> JustInTimeProcessInBulk();
+
+    /// <summary>
+    /// Unlinks all identity provider accounts for a given user in PingOne.
+    /// </summary>
+    /// <param name="samAccountName"></param>
+    /// <returns></returns>
+    Task<IdentityLinkingResponse> UnlinkAllIdentityProviderAccounts(string samAccountName);
 }

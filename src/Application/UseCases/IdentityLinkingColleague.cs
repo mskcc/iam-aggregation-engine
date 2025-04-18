@@ -83,6 +83,11 @@ public class IdentityLinkingColleague : IColleague
              _backgroundJobClient.Enqueue(() => _identityLinkingService.ProcessInBulk());
         }
 
+        if (payload?.NotificationType is nameof(UnlinkAccountIdentityLinkingNotification))
+        {
+            _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkAllIdentityProviderAccounts(samAccountName));
+        }
+
         _logger.LogDebug("Identty Linking Colleague Receives: {message}", serviceKey);
 
         return Task.FromResult<object>(new Response<IdentityLinkingResponse>()

@@ -24,4 +24,9 @@ public class IdentityLinkingResponse
     /// Indicates whether the bulk processing was successful.
     /// </summary>
     public bool IsBulkProcessingSuccessful { get; set; } = false;
+
+    /// <summary>
+    /// Indicates whether the linking was successful.
+    /// </summary>
+    public bool IsUnlinkningSuccessful { get; set; } = false;
 }

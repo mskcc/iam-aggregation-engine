@@ -48,7 +48,7 @@ public class IdentityLinkingService : IIdentityLinkingService
         _apiOptions = apiOptionsMonitor.Get(ApiOptions.SectionKey);
         _hostEnvironment = hostEnvironment;
 
-        _azureUsersSource = applicationDbContext.Set<AzureUsersSource>(_apiOptions.AzureUsersSourceTableName!);
+        _azureUsersSource = applicationDbContext.Set<AzureUsersSource>();
     }
 
     /// <inheritdoc/>
@@ -91,6 +91,77 @@ public class IdentityLinkingService : IIdentityLinkingService
         return new IdentityLinkingResponse
         {
             PingOneResponse = pingOneAccountLinkingResponse
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<IdentityLinkingResponse> UnlinkAllIdentityProviderAccounts(string samAccountName)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingOneUserId = await _pingOneService.GetPingOneUserIdFromSamAccountName(samAccountName);
+        var pingOneLinkedAccountsResponse = await _pingOneService.GetLinkedIdentityProviderAccounts(pingOneUserId);
+        var linkedAccounts = pingOneLinkedAccountsResponse.Embedded?.LinkedAccounts?.ToList();
+
+        if (linkedAccounts?.Count is 0)
+        {
+            _logger.LogWarningToSql(
+                logMessage: $"Unlinking Warning - No linked accounts for samAccountName: {samAccountName}",
+                args: null,
+                requestId: string.Empty,
+                pingOneUserId: string.Empty,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Warning",
+                detail: string.Empty);
+        }
+
+        foreach(var linkedAccount in linkedAccounts!)
+        {
+            if (string.IsNullOrEmpty(linkedAccount.Id))
+            {
+                continue;
+            }
+
+            var pingOneAccountUnlinkingSuccess = await _pingOneService.UnlinkIdentityProivder(pingOneUserId, linkedAccount.Id);
+
+            if (pingOneAccountUnlinkingSuccess is false)
+            {
+                _logger.LogErrorToSql(
+                    logMessage: $"Unlinking Error - PingOneAccountUnlinkingResponse is null for samAccountName: {samAccountName}",
+                    args: null,
+                    requestId: string.Empty,
+                    pingOneUserId: string.Empty,
+                    environment: _hostEnvironment.EnvironmentName,
+                    status: "Error",
+                    detail: "PingOneAccountUnlinkingResponse is null");
+            }
+        }
+
+        var unlinkGatewayResponse = await _pingOneService.UnlinkLdapGatewayIdentity(pingOneUserId, samAccountName);
+        if (unlinkGatewayResponse is null)
+        {
+            _logger.LogErrorToSql(
+                logMessage: $"Unlinking Error - unlinkGatewayResponse is null for samAccountName: {samAccountName}",
+                args: null,
+                requestId: string.Empty,
+                pingOneUserId: string.Empty,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Error",
+                detail: "UnlinkGatewayResponse is null");
+        }
+
+        _logger.LogInformationToSql(
+            logMessage: $"Unlinking - Successfully unlinking Identity Provider accounts for samAccountName: {samAccountName}",
+            args: null,
+            requestId: string.Empty,
+            pingOneUserId: string.Empty,
+            environment: _hostEnvironment.EnvironmentName,
+            status: "Success",
+            detail: string.Empty);
+
+        return new IdentityLinkingResponse
+        {
+            IsUnlinkningSuccessful = true
         };
     }
 

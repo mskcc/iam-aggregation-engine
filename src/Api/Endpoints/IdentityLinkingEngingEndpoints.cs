@@ -30,6 +30,7 @@ public static class IdentityLinkingEngineEndpoints
         var linkMicrosoftIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/microsoft/create");
         var ldapGatewayIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/ldap/create");
         var batchAllIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/batch/create");
+        var unlinkAllAccountsIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/accounts/delete");
 
         app.MapPost(linkPingFederateIdentityEndpoint, LinkPingFederateIdentity)
         .WithName("Create linked account for external ping federate identity provider")
@@ -70,6 +71,17 @@ public static class IdentityLinkingEngineEndpoints
             options.Description = "Use this to link identities to all three identity providers in PingOne.";
             options.Summary = "Link identities to all three identity providers in PingOne.";
             options.Tags = new List<OpenApiTag> { new OpenApiTag { Name = "Link Batch Identities To All Identity Proivders" } };
+
+            return options;
+        })
+        .RequireAuthorization();
+
+        app.MapPost(unlinkAllAccountsIdentityEndpoint, UnlinkAllIdentityProviderAccounts)
+        .WithName("Unlink all identity provider accounts for a given user in PingOne.")
+        .WithOpenApi(options => {
+            options.Description = "Use this to unlink all identity provider accounts for a given user in PingOne.";
+            options.Summary = "Unlinks all identity provider accounts for a given user in PingOne by deleting the linked account.";
+            options.Tags = new List<OpenApiTag> { new OpenApiTag { Name = "Unlink All Identity Providers" } };
 
             return options;
         })
@@ -196,5 +208,35 @@ public static class IdentityLinkingEngineEndpoints
         var result = await notifyIdentityLinkingColleague.Notify(linkingObject);
         
         return Results.Accepted(string.Empty, result);
+    }
+
+    /// <summary>
+    /// Unlinks all identity provider accounts for a given user in PingOne.
+    /// </summary>
+    /// <param name="notifyIdentityLinkingColleague"></param>
+    /// <param name="identityLinkingApiRequest"></param>
+    /// <returns></returns>
+    /// <exception cref="ValidationException"></exception>
+    public static async Task<IResult> UnlinkAllIdentityProviderAccounts(
+        [FromServices] NotifyIdentityLinkingColleague notifyIdentityLinkingColleague, 
+        [FromBody] IdentityLinkingApiRequest identityLinkingApiRequest)
+    {
+        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingColleague);
+        ArgumentNullException.ThrowIfNull(identityLinkingApiRequest);
+
+        if (string.IsNullOrEmpty(identityLinkingApiRequest.SamAccountName))
+        {
+            throw new ValidationException(ErrorNames.ValidationError, "samAccountName is required for this endpoint.");
+        }
+
+        var linkingObject = new UnlinkAccountIdentityLinkingNotification
+        {
+            SamAccountName = identityLinkingApiRequest.SamAccountName,
+            NotificationType = nameof(UnlinkAccountIdentityLinkingNotification)
+        };
+
+        var result = await notifyIdentityLinkingColleague.Notify(linkingObject);
+        
+        return Results.Accepted(string.Empty, result);        
     }
 }

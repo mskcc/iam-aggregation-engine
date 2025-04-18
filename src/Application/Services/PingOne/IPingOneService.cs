@@ -46,4 +46,27 @@ public interface IPingOneService
     /// </summary>
     /// <returns></returns>
     Task<PingOneResponse> GetPingOneIdentitiesForProcessing();
+
+    /// <summary>
+    /// Fetches the identity providers linked to a specified user in PingOne.
+    /// </summary>
+    /// <param name="pingOneUserId"></param>
+    /// <returns></returns>
+    Task<PingOneResponse> GetLinkedIdentityProviderAccounts(string pingOneUserId);
+
+    /// <summary>
+    /// unlinks a specified PingOne identity from the configured linkedAccount Gateway.
+    /// </summary>
+    /// <param name="linkedAccountId"></param>
+    /// <param name="pingOneUserId"></param>
+    /// <returns></returns>
+    Task<bool> UnlinkIdentityProivder(string pingOneUserId, string linkedAccountId);
+
+    /// <summary>
+    /// Unlinks a specified PingOne identity from the configured LDAP Gateway.
+    /// </summary>
+    /// <param name="pingOneUserId"></param>
+    /// <param name="samAccountName"></param>
+    /// <returns></returns>
+    Task<PingOneResponse> UnlinkLdapGatewayIdentity(string pingOneUserId, string samAccountName);
 }
