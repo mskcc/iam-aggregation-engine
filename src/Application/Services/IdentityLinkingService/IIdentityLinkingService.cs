@@ -50,4 +50,30 @@ public interface IIdentityLinkingService
     /// <param name="samAccountName"></param>
     /// <returns></returns>
     Task<IdentityLinkingResponse> UnlinkAllIdentityProviderAccounts(string samAccountName);
+
+    /// <summary>
+    /// Unlinks the PingFederate identity in PingOne.
+    /// </summary>
+    /// <remarks>
+    /// This method removes the linked identity provder account that has SamAccountName as the external ID. 
+    /// <param name="samAccountName"></param>
+    /// <returns></returns>
+    Task<IdentityLinkingResponse> UnlinkIdentityFromPingFederate(string samAccountName);
+
+    /// <summary>
+    /// Unlinks the Entra ID identity in PingOne.
+    /// </summary>
+    /// <remarks>
+    /// This method removes the linked identity provder account that does not have SamAccountName as the external ID.
+    /// </remarks>
+    /// <param name="samAccountName"></param>
+    /// <returns></returns>
+    Task<IdentityLinkingResponse> UnlinkIdentityFromEntraId(string samAccountName);
+
+    /// <summary>
+    /// Unlinks the LDAP identity in PingOne.
+    /// </summary>
+    /// <param name="samAccountName"></param>
+    /// <returns></returns>
+    Task<IdentityLinkingResponse> UnlinkIdentityFromLdapGateway(string samAccountName);
 }

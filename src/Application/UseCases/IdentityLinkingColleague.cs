@@ -68,7 +68,7 @@ public class IdentityLinkingColleague : IColleague
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromPingFederate(samAccountName));
         }
 
-        if (payload?.NotificationType is nameof(MicrosoftIdentityLinkingNotification))
+        if (payload?.NotificationType is nameof(EntraIdentityLinkingNotification))
         {
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromEntraId(samAccountName));
         }
@@ -86,6 +86,21 @@ public class IdentityLinkingColleague : IColleague
         if (payload?.NotificationType is nameof(UnlinkAccountIdentityLinkingNotification))
         {
             _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkAllIdentityProviderAccounts(samAccountName));
+        }
+
+        if (payload?.NotificationType is nameof(UnlinkPingFederateIdentityLinkingNotification))
+        {
+            _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkIdentityFromPingFederate(samAccountName));
+        }
+
+        if (payload?.NotificationType is nameof(UnlinkEntraIdentityLinkingNotification))
+        {
+            _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkIdentityFromEntraId(samAccountName));
+        }
+
+        if (payload?.NotificationType is nameof(UnlinkLdapGatewayIdentityLinkingNotification))
+        {
+            _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkIdentityFromLdapGateway(samAccountName));
         }
 
         _logger.LogDebug("Identty Linking Colleague Receives: {message}", serviceKey);

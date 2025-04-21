@@ -366,4 +366,133 @@ public class IdentityLinkingService : IIdentityLinkingService
 
         return azureUser.Id;
     }
+
+    /// <inheritdoc/>
+    public async Task<IdentityLinkingResponse> UnlinkIdentityFromPingFederate(string samAccountName)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingOneUserId = await _pingOneService.GetPingOneUserIdFromSamAccountName(samAccountName);
+        var pingOneLinkedAccountsResponse = await _pingOneService.GetLinkedIdentityProviderAccounts(pingOneUserId);
+        var linkedAccount = pingOneLinkedAccountsResponse.Embedded?.LinkedAccounts?.Where(la => la.ExternalId == samAccountName).SingleOrDefault();
+        ArgumentNullException.ThrowIfNull(linkedAccount?.Id);
+        
+        var pingOneAccountUnlinkingSuccess = await _pingOneService.UnlinkIdentityProivder(pingOneUserId, linkedAccount.Id);
+
+        if (pingOneAccountUnlinkingSuccess is false)
+        {
+            _logger.LogErrorToSql(
+                logMessage: $"Unlinking Ping Federate Error - PingOneAccountUnlinkingResponse is null for samAccountName: {samAccountName}",
+                args: null,
+                requestId: string.Empty,
+                pingOneUserId: string.Empty,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Error",
+                detail: "PingOneAccountUnlinkingResponse is null");
+
+            return new IdentityLinkingResponse
+            {
+                IsUnlinkningSuccessful = false
+            };
+        }
+
+        _logger.LogInformationToSql(
+            logMessage: $"Unlinking Ping Federate - Successfully unlinking Identity Provider accounts for samAccountName: {samAccountName}",
+            args: null,
+            requestId: string.Empty,
+            pingOneUserId: string.Empty,
+            environment: _hostEnvironment.EnvironmentName,
+            status: "Success",
+            detail: string.Empty);
+
+        return new IdentityLinkingResponse
+        {
+            IsUnlinkningSuccessful = true
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<IdentityLinkingResponse> UnlinkIdentityFromEntraId(string samAccountName)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingOneUserId = await _pingOneService.GetPingOneUserIdFromSamAccountName(samAccountName);
+        var pingOneLinkedAccountsResponse = await _pingOneService.GetLinkedIdentityProviderAccounts(pingOneUserId);
+        var linkedAccount = pingOneLinkedAccountsResponse.Embedded?.LinkedAccounts?.Where(la => la.ExternalId != samAccountName).SingleOrDefault();
+        ArgumentNullException.ThrowIfNull(linkedAccount?.Id);
+        
+        var pingOneAccountUnlinkingSuccess = await _pingOneService.UnlinkIdentityProivder(pingOneUserId, linkedAccount.Id);
+
+        if (pingOneAccountUnlinkingSuccess is false)
+        {
+            _logger.LogErrorToSql(
+                logMessage: $"Unlinking Ping Federate Error - PingOneAccountUnlinkingResponse is null for samAccountName: {samAccountName}",
+                args: null,
+                requestId: string.Empty,
+                pingOneUserId: string.Empty,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Error",
+                detail: "PingOneAccountUnlinkingResponse is null");
+
+            return new IdentityLinkingResponse
+            {
+                IsUnlinkningSuccessful = false
+            };
+        }
+
+        _logger.LogInformationToSql(
+            logMessage: $"Unlinking Ping Federate - Successfully unlinking Identity Provider accounts for samAccountName: {samAccountName}",
+            args: null,
+            requestId: string.Empty,
+            pingOneUserId: string.Empty,
+            environment: _hostEnvironment.EnvironmentName,
+            status: "Success",
+            detail: string.Empty);
+
+        return new IdentityLinkingResponse
+        {
+            IsUnlinkningSuccessful = true
+        };
+    }
+
+    /// <inheritdoc/>
+    public async Task<IdentityLinkingResponse> UnlinkIdentityFromLdapGateway(string samAccountName)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(samAccountName);
+
+        var pingOneUserId = await _pingOneService.GetPingOneUserIdFromSamAccountName(samAccountName);
+        ArgumentNullException.ThrowIfNull(pingOneUserId);
+
+        var unlinkGatewayResponse = await _pingOneService.UnlinkLdapGatewayIdentity(pingOneUserId, samAccountName);
+        if (unlinkGatewayResponse is null)
+        {
+            _logger.LogErrorToSql(
+                logMessage: $"Unlinking LDAP Gateway Error - unlinkGatewayResponse is null for samAccountName: {samAccountName}",
+                args: null,
+                requestId: string.Empty,
+                pingOneUserId: string.Empty,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Error",
+                detail: "UnlinkGatewayResponse is null");
+            
+            return new IdentityLinkingResponse
+            {
+                IsUnlinkningSuccessful = false
+            };
+        }
+
+        _logger.LogInformationToSql(
+            logMessage: $"Unlinking LDAP Gateway - Successfully unlinking Identity Provider accounts for samAccountName: {samAccountName}",
+            args: null,
+            requestId: string.Empty,
+            pingOneUserId: string.Empty,
+            environment: _hostEnvironment.EnvironmentName,
+            status: "Success",
+            detail: string.Empty);
+        
+        return new IdentityLinkingResponse
+        {
+            IsUnlinkningSuccessful = true
+        };
+    }
 }
