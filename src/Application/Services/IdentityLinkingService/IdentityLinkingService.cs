@@ -331,7 +331,7 @@ public class IdentityLinkingService : IIdentityLinkingService
                 detail: string.Empty);
 
             requestedIdentity.Status = "Completed";
-            requestedIdentity.Attempts = requestedIdentity.Attempts + 1;
+            requestedIdentity.Attempts = requestedIdentity.Attempts++;
             requestedIdentity.LastProcessingAttempt = DateTime.UtcNow;
 
             var identityLinkingProcessingReqeustArchive = new IdentityLinkingProcessingReqeustArchive
