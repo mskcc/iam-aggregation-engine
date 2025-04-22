@@ -4,7 +4,7 @@ This document outlines how to configure the application to start/stop processing
 
 ----
 
-This application has multiple different operating procedures. In this document we will go over the operating procedure for Identity Linking planned and spec'd out by this [Lucid Flowchart](https://lucid.app/lucidchart/f3200eae-463e-4991-9c53-2377ed2478e9/edit?docId=f3200eae-463e-4991-9c53-2377ed2478e9&shared=true&page=0_0&invitationId=inv_6f02fae2-02b5-460e-98b2-5199740189ef#) for more information on the other available operating procedures that this service supports like 'Just In Time Linking' checkout [Just in Time Linking](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/JustInTimeIdentityLinking.md)
+This application has multiple different operating procedures. In this document we will go over the operating procedure for Identity Linking planned and spec'd out by this [Lucid Flowchart](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/PingRequest_Engine.png) for more information on the other available operating procedures that this service supports like 'Just In Time Linking' checkout [Just in Time Linking](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/JustInTimeIdentityLinking.md)
 
 ## Configuration in `appsettings.json`
 
@@ -142,7 +142,7 @@ This table is written to by the service when the Bulk/Batch Processing Job API E
 ----
 
 ## API Endpoints for Identity Linking
-This section will go over the available API endpoints used to link identities and which API endpoints are used for this identity linking workflow: [Lucid Flowchart](https://lucid.app/lucidchart/f3200eae-463e-4991-9c53-2377ed2478e9/edit?docId=f3200eae-463e-4991-9c53-2377ed2478e9&shared=true&page=0_0&invitationId=inv_6f02fae2-02b5-460e-98b2-5199740189ef#). 
+This section will go over the available API endpoints used to link identities and which API endpoints are used for this identity linking workflow: [Lucid Flowchart](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/PingRequest_Engine.png). 
 
 ### Identity Linking API Overview & Setup
 OpenAPI is used within the code base to document the API endpoints as they are being developed.  Scalar is a Microsoft supported service that displays the OpenAPI documentation in a human readable and interactive interface in a web UI (Scalar has since replaced the deprecated Swagger workflow). It can be found by appending /scalar/v1 (ex: https://server:7250/scalar/v1).  Here you will be able to make requests, and see code examples of how to use the API endpoints in other code bases. It also has an option to download the API documentation as a Postman collection. This section of the readme will be a walkthrough of how to use the API endpoints with postman. 
