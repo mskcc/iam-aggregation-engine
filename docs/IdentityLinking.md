@@ -39,9 +39,18 @@ Below is an example of the relevant section of the configuration:
 
 
 ## Logs 
+### Log File
 Logging is done through a rolling log file that is located in the IIS directory of the server. It's named /logs.
-There is an appsetting configuration for globally settings the retention rate for the rolling log file. In 'appsettings.json' it's called ```LoggingRetentionDays``` and in the example configuration within this documentation it's configured to be retained for 7 days. 
+There is an appsetting configuration for globally settings the retention rate for the rolling log file. In 'appsettings.json' it's called ```LoggingRetentionDays``` and in the example configuration within this documentation it's configured to be retained for 7 days.
+
+----
+
+### SQL Table Logging
 It's also done in the Logging Table of the configured database which we is documented in detail the next section. 
+
+---- 
+### Hangfire Logging
+During triage/troubleshooting additional information surrounding jobs can be found within the hangfire dashboard (/hangfire). All API actions are configured to be handled as fire-and-forget or recurring scheduled hangfire jobs and can be found and monitored within the Hangfire dashbaord. 
 
 ## SQL Dependencies
 Each environment instance manages it's own tables, entities, and migrations. EF Core is leveraged to handle everything from database migration to entity and modeling creation and unit testing. This is true for all dependent tables except for the Azure Users Source Table. 
