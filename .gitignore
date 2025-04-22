@@ -121,5 +121,6 @@ Dockerfile*
 dotnet-tools.json
 
 # Local files 
+appsettings.LocalProduction.json
 appsettings.LocalDevelopment.json
 appsettings.LocalTest.json

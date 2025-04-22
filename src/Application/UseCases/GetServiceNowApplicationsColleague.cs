@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Flurl;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -77,6 +78,9 @@ public class GetServiceNowApplicationsColleague : IColleague
     /// <exception cref="ValidationException"></exception>
     public async Task<object> Receive(string serviceKey, object? payloadData)
     {
+        var json = JsonSerializer.Serialize(payloadData);
+        var serviceNowApplicationsPayload = JsonSerializer.Deserialize<ServiceNowApplicationsPayload>(json);
+
         var serviceNowApplicationsEndpoint = _apiOptions.BaseEndpoint.AppendPathSegment(_apiOptions.ServiceNowApplicationsEndpoint);
 
         if (_resourceStateService.IsServiceNowApplicationsAggregationRunning)
@@ -104,6 +108,14 @@ public class GetServiceNowApplicationsColleague : IColleague
 
         var serviceNowApplications = await _serviceNowService.GetServiceNowApplicationsAsync(filter);
         var totalRecords = _serviceNowService.GetServiceNowApplicationsCount();
+
+        if (serviceNowApplicationsPayload?.ApplicationNameFilter is not null)
+        {
+            var searchServiceNowApplications = await _serviceNowService.GetServiceNowApplicationsAsync();
+            serviceNowApplications = searchServiceNowApplications
+                .Where(x => x.Name!.Contains(serviceNowApplicationsPayload.ApplicationNameFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         var pagedResponse = _pagedResponseService
             .GetPagedResponse(serviceNowApplications, totalRecords, filter, serviceNowApplicationsEndpoint);

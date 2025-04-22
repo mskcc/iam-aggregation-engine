@@ -31,6 +31,7 @@ public static class ServiceKeys
         yield return AggregateServiceNowUsersColleague;
         yield return GetServiceNowUsersColleague;
         yield return PurgeServiceNowUsersColleague;
+        yield return IdentityLinkingColleague;
     }
 
     /// <summary>
@@ -112,4 +113,9 @@ public static class ServiceKeys
     /// Key for PurgeServiceNowUsersColleague
     /// </summary>
     public const string PurgeServiceNowUsersColleague = "PurgeServiceNowUsersColleague";
+
+    /// <summary>
+    /// Key for IdentityLinkingColleague
+    /// </summary>
+    public const string IdentityLinkingColleague = "IdentityLinkingColleague";
 }

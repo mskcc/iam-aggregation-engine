@@ -139,4 +139,29 @@ public class ApiOptions
     /// Options for recurring purges.
     /// </summary>
     public string PurgeSchedule { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Options for the Hangfire dashboard path.
+    /// </summary>
+    public string HangfireDashboardPath { get; set;} = string.Empty;
+
+    /// <summary>
+    /// Options for the Hangfire dashboard read-only mode.
+    /// </summary>
+    public bool HangfireDashboardIsReadOnly { get; set; }
+
+    /// <summary>
+    /// Options for the name of the table to get azure users from in the configured database.
+    /// </summary>
+    public string? AzureUsersSourceTableName { get; set; }
+
+    /// <summary>
+    /// Options for the name of the table to get identity processing requests from in the configured database.
+    /// </summary>
+    public int BulkProcessingBatchSize { get; set; } = 25;
+
+    /// <summary>
+    /// Options for the name of the table to get identity processing requests from in the configured database.
+    /// </summary>
+    public string? BulkProcessingBatchSchedule { get; set; }
 }

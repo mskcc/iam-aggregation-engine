@@ -40,18 +40,18 @@ public static class WebApplicationExtensions
     {
         ArgumentNullException.ThrowIfNull(app);
 
+        using var scope = app.Services.CreateScope();
+        var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+        var options = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<ApiOptions>>().CurrentValue;
+
         var dashboardOptions = new DashboardOptions
         {
-            IsReadOnlyFunc = context => true,
+            IsReadOnlyFunc = context => options.HangfireDashboardIsReadOnly,
             Authorization = new[] { new AllowAllAuthorizationFilter() }
         };
 
         app.UseHangfireDashboard("/hangfire", dashboardOptions);
         app.MapHangfireDashboard();
-
-        using var scope = app.Services.CreateScope();
-        var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-        var options = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<ApiOptions>>().CurrentValue;
             
         ArgumentNullException.ThrowIfNull(recurringJobManager);
         ArgumentNullException.ThrowIfNull(options);
