@@ -160,11 +160,11 @@ You are now ready to start using the service.
 ### Identity Linking API Operating Procedure
 The Identity Linking Engine provides two endpoints that will be used to start and stop the batch processing of linking identities to all 3 targets. 
 
-API Endpoints: 
+API Endpoints (no json payload is required): 
 |           Action            |                    Endpoint                      |                Description                        |
 |-----------------------------|--------------------------------------------------|---------------------------------------------------|
-| **Start Identity Linking**  | `/api/v1/identitylinking/recurringbatchjob/start`| Primary key; uniquely identifies each record.     |
-| **Stop Identity Linking**   | `/api/v1/identitylinking/recurringbatchjob/stop`  | Primary key; uniquely identifies each record.    |
+| POST **Start Identity Linking**  | `/api/v1/identitylinking/recurringbatchjob/start`| Starts Identity Linking Engine processing as recurring backgroun job.|
+| POST **Stop Identity Linking**   | `/api/v1/identitylinking/recurringbatchjob/stop` | Stops Identity Linking Engine's recurring background processing.|
 
 ----
 
@@ -178,17 +178,24 @@ When the stop endpoint is invoked, the service will remove the configured hangfi
 These are some helpful identity linking endpoints that can be leveraged for triage situations or situations where a fallback script needs to handle ad-hoc one off linking creations. These endpoints will also cover unlinking/deleting identities for both ad-hoc one off operations and fully processed (as in unlinking all 3 targets at once or one at a time).
 
 
+
 API Endpoints:
 
 |         Action           |                Endpoint                      |                Description                        |
 |--------------------------|----------------------------------------------|---------------------------------------------------|
-| **Link Ping Federate**   | `/api/v1/identitylinking/pingfederate/create`| Primary key; uniquely identifies each record.     |
-| **Link Entra ID**        | `/api/v1/identitylinking/microsoft/create`   | Timestamp indicating when the record was created. |
-| **Link LDAP Gateway**    | `/api/v1/identitylinking/ldap/create`        | Describes the type/category of the record (e.g., sync, update). |
-| **Link All Targets**     | `/api/v1/identitylinking/all/create`         | Timestamp of the most recent processing attempt. |
-| **Unlink All Targets**   | `/api/v1/identitylinking/all/delete`         | Specifies the environment the record belongs to (e.g., Dev, QA, Prod). |
-| **Unlink Ping Federate** | `/api/v1/identitylinking/pingfederate/delete`| User ID from the PingOne identity provider. |
-| **Unlink Entra ID**      | `/api/v1/identitylinking/microsoft/delete`   | Object ID from Microsoft Entra ID (formerly Azure AD). |
-| **Unlink LDAP Gateway**  | `/api/v1/identitylinking/ldap/delete`        | The user's SAM (Security Account Manager) account name. |
+| POST **Link Ping Federate**   | `/api/v1/identitylinking/pingfederate/create`| Links the identity to Ping Federate.              |
+| POST **Link Entra ID**        | `/api/v1/identitylinking/microsoft/create`   | Links the identity to Entra ID.                   |
+| POST **Link LDAP Gateway**    | `/api/v1/identitylinking/ldap/create`        | Links the identity to LDAP Gateway                |
+| POST **Link All Targets**     | `/api/v1/identitylinking/all/create`         | Links the identity to all 3 targets (Ping Federate, Entra ID and LDAP Gateway) in one HTTP request. |
+| POST **Unlink All Targets**   | `/api/v1/identitylinking/all/delete`         | Unlinks the identity from all 3 targets (Ping Federate, Entra ID and LDAP Gateway) in one HTTP request. |
+| POST **Unlink Ping Federate** | `/api/v1/identitylinking/pingfederate/delete`| Unlinks the identity from Ping Federate.          |
+| POST **Unlink Entra ID**      | `/api/v1/identitylinking/microsoft/delete`   | Unlinks the identity from Entra ID.               |
+| POST **Unlink LDAP Gateway**  | `/api/v1/identitylinking/ldap/delete`        | Unlinks the identity from LDAP Gateway.           |
 
+All of these API endpoints require a json payload that contains the samaccountname of the identity to be processed. The payload looks like the following: 
+```json
+{
+    "samAccountName": "doeJohn"
+}
+```
 ----
