@@ -114,13 +114,17 @@ public static class ServiceNowEndpoints
         [FromServices] NotifyGetServiceNowApplicationsColleague notifyGetServiceNowApplicationsColleague,
         [FromServices] IPaginationService paginationService,
         [FromQuery] int pageNumber = 0,
-        [FromQuery] int pageSize = 0)
+        [FromQuery] int pageSize = 0,
+        [FromQuery] string? applicationNameFilter = null)
     {
         ArgumentNullException.ThrowIfNull(notifyGetServiceNowApplicationsColleague);
         ArgumentNullException.ThrowIfNull(paginationService);
 
         paginationService.PaginationFilter = new PaginationFilter(pageNumber, pageSize);
-        var response = await notifyGetServiceNowApplicationsColleague.GetResponse();
+        
+        var response = await notifyGetServiceNowApplicationsColleague.GetResponse(new {
+            ApplicationNameFilter = applicationNameFilter
+        });
 
         return Results.Ok(response);
     }

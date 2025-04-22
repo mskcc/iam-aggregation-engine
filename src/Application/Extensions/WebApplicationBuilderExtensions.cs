@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.IdentityLinkingService;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Extensions;
 
@@ -72,6 +73,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddKeyedTransient<IColleague, GetServiceNowUsersColleague>(ServiceKeys.GetServiceNowUsersColleague);
         builder.Services.AddKeyedTransient<IColleague, PurgeServiceNowUsersColleague>(ServiceKeys.PurgeServiceNowUsersColleague);
 
+        builder.Services.AddKeyedTransient<IColleague, IdentityLinkingColleague>(ServiceKeys.IdentityLinkingColleague);
+
         // Register Notifications
         builder.Services.AddTransient<NotifyPurgeOidcColleague>();
         builder.Services.AddTransient<NotifyAggregateOidcConnectionsColleague>();
@@ -93,6 +96,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddTransient<NotifyAggregateServiceNowUsersColleague>();
         builder.Services.AddTransient<NotifyGetServiceNowUsersColleague>();
         builder.Services.AddTransient<NotifyPurgeServiceNowUsersColleague>();
+
+        builder.Services.AddTransient<NotifyIdentityLinkingColleague>();
 
         return builder;
     }
@@ -332,6 +337,8 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddOptionsWithValidateOnStart<ApiOptions>()
             .BindConfiguration(ApiOptions.SectionKey);
+        builder.Services.AddOptionsWithValidateOnStart<PingOneOptions>()
+            .BindConfiguration(PingOneOptions.SectionKey);
         
         return builder;
     }
@@ -407,6 +414,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddScoped<IPingFederateService, PingFederateService>();
         builder.Services.AddScoped<ILegacyService, LegacyService>();
         builder.Services.AddScoped<IServiceNowService, ServiceNowService>();
+        builder.Services.AddScoped<IIdentityLinkingService, IdentityLinkingService>();
         builder.Services
             .AddHttpContextAccessor()
             .AddScoped<IUriHelperService, UriHelperService>(services => {
@@ -415,33 +423,24 @@ public static class WebApplicationBuilderExtensions
                 var uri = string.Concat(request?.Scheme, "://", request?.Host.ToUriComponent());
                 return new UriHelperService(uri);
             });
+
+        // PingIdentity services
+        builder.AddPingIdentityServices();
             
         return builder;
     }
 
     /// <summary>
-    /// Adds logging use serilog.
-    /// Documentation can be found here: https://github.com/serilog/serilog-extensions-logging
+    /// Add Ping Identity services to the web application.
     /// </summary>
     /// <param name="builder"></param>
-    /// <returns></returns>
-    public static WebApplicationBuilder AddSerilogLogging(this WebApplicationBuilder builder)
+    /// <returns><see cref="WebApplicationBuilder"/></returns>
+    public static WebApplicationBuilder AddPingIdentityServices(this WebApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        var apiOptions = builder.Configuration.GetSection(ApiOptions.SectionKey).Get<ApiOptions>();
-        ArgumentNullException.ThrowIfNull(apiOptions);
-
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("logs/log-.txt", 
-                rollingInterval: RollingInterval.Day, 
-                outputTemplate: "{Timestamp:HH:mm} [{Level}] ({ThreadId}) {Message}{NewLine}{Exception}",
-                retainedFileCountLimit: apiOptions.LoggingRetentionDays)
-            .CreateLogger();
-
-        builder.Services.AddLogging(loggingBuilder => {
-            loggingBuilder.AddSerilog(dispose: true);
-        });
+        builder.Services.AddPingIdentityHttpClients(builder.Configuration);
+        builder.Services.AddPingIdentityServices(builder.Configuration);
 
         return builder;
     }

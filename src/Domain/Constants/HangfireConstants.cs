@@ -54,4 +54,9 @@ public static class HangfireConstants
     /// The recurring job id for service now user.
     /// </summary>
     public const string ServiceNowUsersRecurringPurgeJobId = "Mskcc.Hangfire.Recurring.ServiceNow.Purge.Users";
+
+    /// <summary>
+    /// The recurring job id for starting the identity linking processing.
+    /// </summary>
+    public const string StartIdentityLinkingProcessingRecurringJobId = "Mskcc.Hangfire.Recurring.IdentityLinking.Start.BatchProcessing";
 }

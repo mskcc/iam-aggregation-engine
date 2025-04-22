@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250417180144_AddIdentityLinkingQueueAndArchiveTables")]
+    partial class AddIdentityLinkingQueueAndArchiveTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,80 +60,6 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                     b.HasIndex("SpConnectionPrimaryKey");
 
                     b.ToTable("IDM_PingID_Attributes_List");
-                });
-
-            modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.AzureUsersSource", b =>
-                {
-                    b.Property<string>("AccountEnabled")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Department")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmployeeId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GivenName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JobTitle")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Mail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MobilePhone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OfficeLocation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OnPremisesDistinguishedName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OnPremisesDomainName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("OnPremisesLastSyncDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OnPremisesSamAccountName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OnPremisesSecurityIdentifier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OnPremisesSyncEnabled")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OnPremisesUserPrincipalName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PreferredLanguage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Surname")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsageLocation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserPrincipalName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("...", (string)null);
                 });
 
             modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.IdentityLinkingProcessingReqeustArchive", b =>

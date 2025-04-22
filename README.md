@@ -9,7 +9,8 @@ A powerful **Web API** that aggregates **Ping Federate** SAML and OIDC connectio
 - **SAML & OIDC Connection Aggregation**: Collects connection data from **Ping Federate** and stores it into SQL databases.
 - **Hangfire Integration**: Schedules and manages recurring and fire-and-forget background jobs with the **Hangfire Dashboard**.
 - **Scalar**: Provides an interactive API documentation for easy development and testing in **development mode**.
-
+- **Identity Linking Engine**: Service in the form of API endpionts for migrating/linking identities within PingOne. See 
+documentation here: [Identity Linking Documentation](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/IdentityLinking.md)
 ---
 
 ## ⚙️ Getting Started Locally
@@ -87,6 +88,9 @@ Once the application is running, you can also access the **Hangfire Dashboard** 
 
 ## Creating Database Migrations
 Example of creating an InitialCreate migration. Run this the ```/src/Api``` directory.
+connection string must be configured in the appsettings.json or appsettings.development.json file that your environment is pointing too. 
+If you see an error similar to this: ```Format of the initialization string does not conform to specification starting at index 0```
+This is an indication that there is a configuration issue during ef miggrations. First place to check is appsettings.
 ```bash
 dotnet ef migrations add InitialCreate --output-dir ../Infrastructure/Data/Migrations --project ../Infrastructure/Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.csproj
 ```

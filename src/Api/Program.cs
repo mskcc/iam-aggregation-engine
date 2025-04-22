@@ -59,6 +59,7 @@ app.UseAccessControl();
 app.UseHangfire();
 
 // Map Ping Federate connections endpoints for the API.
+app.MapIdentityLinkingEngineEndpoints();
 app.MapPingFederateSamlConnectionsEndpoints();
 app.MapPingFederateOidcConnectionsEndpoints();
 app.MapPingFederateLegacyConnectionsEndpoints();
