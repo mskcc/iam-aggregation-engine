@@ -15,7 +15,8 @@ Below is an example of the relevant section of the configuration:
   "Api": {
     "AzureUsersSourceTableName": "AzureUsers_Source_Stage", // This is the table used to link identites to associated Microsoft Entra Object IDs.
     "BulkProcessingBatchSize": 25, // This tells the service how many identites to process during each recurring job cycle.
-    "BulkProcessingBatchSchedule": "* * * * *" // This tells the service the frequency in which to process each job cycle. 
+    "BulkProcessingBatchSchedule": "* * * * *", // This tells the service the frequency in which to process each job cycle. 
+    "LoggingRetentionDays": 7, // Retention for rolling log file.
   },
   "PingOne": {
     "ApiBaseUrl": "https://api.pingone.com/v1", // This is the base url for API requests to PingOne.
@@ -35,6 +36,12 @@ Below is an example of the relevant section of the configuration:
   },
 }
 ```
+
+
+## Logs 
+Logging is done through a rolling log file that is located in the IIS directory of the server. It's named /logs.
+There is an appsetting configuration for globally settings the retention rate for the rolling log file. In 'appsettings.json' it's called ```LoggingRetentionDays``` and in the example configuration within this documentation it's configured to be retained for 7 days. 
+It's also done in the Logging Table of the configured database which we is documented in detail the next section. 
 
 ## SQL Dependencies
 Each environment instance manages it's own tables, entities, and migrations. EF Core is leveraged to handle everything from database migration to entity and modeling creation and unit testing. This is true for all dependent tables except for the Azure Users Source Table. 
