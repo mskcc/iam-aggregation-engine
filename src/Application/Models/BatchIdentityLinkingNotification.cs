@@ -1,6 +1,6 @@
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
 
-public class BatchIdentityLinkingNotification : IdentityLinkingNotification
+public class LinkAllTargetsForIdentityNotification : IdentityLinkingNotification
 {
     
 }

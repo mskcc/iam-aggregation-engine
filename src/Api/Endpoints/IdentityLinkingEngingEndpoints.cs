@@ -25,12 +25,15 @@ public static class IdentityLinkingEngineEndpoints
         ArgumentNullException.ThrowIfNull(app);
         
         var options = app.ServiceProvider.GetRequiredService<IOptionsMonitor<ApiOptions>>().CurrentValue;
-        var testEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/test/create");
         var linkPingFederateIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/pingfederate/create");
         var linkMicrosoftEntraIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/microsoft/create");
         var ldapGatewayIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/ldap/create");
-        var batchAllIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/batch/create");
-        var unlinkAllAccountsIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/accounts/delete");
+        
+        var linkAllTargetsIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/all/create");
+        var recurringBatchJobStartAllIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/recurringbatchjob/start");
+        var recurringBatchJobStopAllIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/recurringbatchjob/stop");
+
+        var unlinkAllAccountsIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/all/delete");
         var unlinkPingFederateIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/pingfederate/delete");
         var unlinkMicrosoftEntraIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/microsoft/delete");
         var unlinkLdapGatewayIdentityEndpoint = options.BaseEndpoint.AppendPathSegment("identitylinking/ldap/delete");
@@ -68,12 +71,34 @@ public static class IdentityLinkingEngineEndpoints
         })
         .RequireAuthorization();
 
-        app.MapPost(batchAllIdentityEndpoint, LinkAllBatchIdentities)
+        app.MapPost(linkAllTargetsIdentityEndpoint, LinkAllTargetsForIdentity)
         .WithName("Create linked account for external LDAP Gateway, Entra ID and Ping Federate in batches.")
         .WithOpenApi(options => {
             options.Description = "Use this to link identities to all three identity providers in PingOne.";
             options.Summary = "Link identities to all three identity providers in PingOne.";
             options.Tags = new List<OpenApiTag> { new OpenApiTag { Name = "Link Batch Identities To All Identity Proivders" } };
+
+            return options;
+        })
+        .RequireAuthorization();
+
+        app.MapPost(recurringBatchJobStartAllIdentityEndpoint, StartProcessingLinkAllBatchIdentities)
+        .WithName("Start Processing of the batch identity linking job.")
+        .WithOpenApi(options => {
+            options.Description = "Start the processing of the batch identity linking job.";
+            options.Summary = "Start the processing of the batch identity linking job.";
+            options.Tags = new List<OpenApiTag> { new OpenApiTag { Name = "Start Bulk Identity Linking Processing" } };
+
+            return options;
+        })
+        .RequireAuthorization();
+
+        app.MapPost(recurringBatchJobStopAllIdentityEndpoint, StopProcessingLinkAllBatchIdentities)
+        .WithName("Stop Processing of the batch identity linking job.")
+        .WithOpenApi(options => {
+            options.Description = "Stops the processing of the batch identity linking job.";
+            options.Summary = "Stops the processing of the batch identity linking job.";
+            options.Tags = new List<OpenApiTag> { new OpenApiTag { Name = "Stop Bulk Identity Linking Processing" } };
 
             return options;
         })
@@ -223,7 +248,7 @@ public static class IdentityLinkingEngineEndpoints
     /// <param name="contextAccessor"></param>
     /// <param name="samAccountName"></param>
     /// <returns></returns>
-    public static async Task<IResult> LinkAllBatchIdentities(
+    public static async Task<IResult> LinkAllTargetsForIdentity(
         [FromServices] NotifyIdentityLinkingColleague notifyIdentityLinkingColleague, 
         [FromBody] IdentityLinkingApiRequest identityLinkingApiRequest)
     {
@@ -235,10 +260,50 @@ public static class IdentityLinkingEngineEndpoints
             throw new ValidationException(ErrorNames.ValidationError, "samAccountName is required for this endpoint.");
         }
 
-        var linkingObject = new BatchIdentityLinkingNotification
+        var linkingObject = new LinkAllTargetsForIdentityNotification
         {
             SamAccountName = identityLinkingApiRequest.SamAccountName,
-            NotificationType = nameof(BatchIdentityLinkingNotification)
+            NotificationType = nameof(LinkAllTargetsForIdentityNotification)
+        };
+
+        var result = await notifyIdentityLinkingColleague.Notify(linkingObject);
+        
+        return Results.Accepted(string.Empty, result);
+    }
+
+    /// <summary>
+    /// Starts the processing of the batch identity linking job.
+    /// </summary>
+    /// <param name="notifyIdentityLinkingColleague"></param>
+    /// <returns></returns>
+    public static async Task<IResult> StartProcessingLinkAllBatchIdentities(
+        [FromServices] NotifyIdentityLinkingColleague notifyIdentityLinkingColleague)
+    {
+        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingColleague);
+
+        var linkingObject = new StartIdentityLinkingBatchProcessingNotification
+        {
+            NotificationType = nameof(StartIdentityLinkingBatchProcessingNotification)
+        };
+
+        var result = await notifyIdentityLinkingColleague.Notify(linkingObject);
+        
+        return Results.Accepted(string.Empty, result);
+    }
+
+    /// <summary>
+    /// Stops the processing of the batch identity linking job.
+    /// </summary>
+    /// <param name="notifyIdentityLinkingColleague"></param>
+    /// <returns></returns>
+    public static async Task<IResult> StopProcessingLinkAllBatchIdentities(
+        [FromServices] NotifyIdentityLinkingColleague notifyIdentityLinkingColleague)
+    {
+        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingColleague);
+
+        var linkingObject = new StopIdentityLinkingBatchProcessingNotification
+        {
+            NotificationType = nameof(StopIdentityLinkingBatchProcessingNotification)
         };
 
         var result = await notifyIdentityLinkingColleague.Notify(linkingObject);

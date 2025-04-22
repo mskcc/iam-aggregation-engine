@@ -32,7 +32,25 @@ public interface IIdentityLinkingService
     /// This method has dependencies for all GUIDs in the database.
     /// </remarks>
     /// <returns></returns>
-    Task<IdentityLinkingResponse> ProcessInBulk();
+    Task<IdentityLinkingResponse> ProcessInBulk(int maxNumberOfAttempts = 1);
+
+    /// <summary>
+    /// Bulk processing for linking identities in pingone.
+    /// </summary>
+    /// <remarks>
+    /// This method has dependencies for all GUIDs in the database.
+    /// </remarks>
+    /// <returns></returns>
+    Task<IdentityLinkingResponse> ProcessIdentityLinkingRequestQueue();
+
+    /// <summary>
+    /// Retry Bulk processing for linking identities in pingone.
+    /// </summary>
+    /// <remarks>
+    /// This method has dependencies for all GUIDs in the database.
+    /// </remarks>
+    /// <returns></returns>
+    Task<IdentityLinkingResponse> RetryProcessIdentityLinkingRequestQueue(int maxNumberOfAttempts);
 
     /// <summary>
     /// Bulk processing for linking identities in pingone.

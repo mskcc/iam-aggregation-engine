@@ -215,14 +215,25 @@ public class IdentityLinkingService : IIdentityLinkingService
     }
 
     /// <inheritdoc/>
-    public async Task<IdentityLinkingResponse> ProcessInBulk()
+    public async Task<IdentityLinkingResponse> ProcessIdentityLinkingRequestQueue()
     {
-        // TODO: Make this a recurring job on a schedule.
+        return await ProcessInBulk();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IdentityLinkingResponse> RetryProcessIdentityLinkingRequestQueue(int maxNumberOfAttempts)
+    {
+        return await ProcessInBulk(maxNumberOfAttempts);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IdentityLinkingResponse> ProcessInBulk(int maxNumberOfAttempts = 1)
+    {
         var identityProcessingRequestQueueDbSet = _applicationDbContext.Set<IdentityLinkingProcessingReqeustQueue>();
         var identityLinkingProcessingReqeustArchiveDbSet = _applicationDbContext.Set<IdentityLinkingProcessingReqeustArchive>();
 
         var requestedIdentitiesForProcessing = identityProcessingRequestQueueDbSet
-            .Where(x => x.Status != "Completed")
+            .Where(x => x.Status != "Completed" && x.Attempts < maxNumberOfAttempts)
             .AsSplitQuery()
             .OrderBy(r => r.Id)
             .Take(_apiOptions.BulkProcessingBatchSize)
@@ -233,6 +244,10 @@ public class IdentityLinkingService : IIdentityLinkingService
             var pingOneUserId = requestedIdentity.PingOneUserId;
             var samAccountName = requestedIdentity.SamAccountName;
             var entraObjectId = requestedIdentity.EntraObjectId;
+
+            requestedIdentity.Attempts++;
+            requestedIdentity.LastProcessingAttempt = DateTime.UtcNow;
+            await _applicationDbContext.SaveChangesAsync();
 
             if (string.IsNullOrEmpty(pingOneUserId))
             {
@@ -331,8 +346,7 @@ public class IdentityLinkingService : IIdentityLinkingService
                 detail: string.Empty);
 
             requestedIdentity.Status = "Completed";
-            requestedIdentity.Attempts = requestedIdentity.Attempts++;
-            requestedIdentity.LastProcessingAttempt = DateTime.UtcNow;
+            requestedIdentity.IsProcessedSuccessfully = true;
 
             var identityLinkingProcessingReqeustArchive = new IdentityLinkingProcessingReqeustArchive
             {

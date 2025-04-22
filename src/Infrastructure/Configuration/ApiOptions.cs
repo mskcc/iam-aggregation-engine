@@ -159,4 +159,9 @@ public class ApiOptions
     /// Options for the name of the table to get identity processing requests from in the configured database.
     /// </summary>
     public int BulkProcessingBatchSize { get; set; } = 25;
+
+    /// <summary>
+    /// Options for the name of the table to get identity processing requests from in the configured database.
+    /// </summary>
+    public string? BulkProcessingBatchSchedule { get; set; }
 }

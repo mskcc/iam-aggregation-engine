@@ -9,7 +9,8 @@ A powerful **Web API** that aggregates **Ping Federate** SAML and OIDC connectio
 - **SAML & OIDC Connection Aggregation**: Collects connection data from **Ping Federate** and stores it into SQL databases.
 - **Hangfire Integration**: Schedules and manages recurring and fire-and-forget background jobs with the **Hangfire Dashboard**.
 - **Scalar**: Provides an interactive API documentation for easy development and testing in **development mode**.
-
+- **Identity Linking Engine**: Service in the form of API endpionts for migrating/linking identities within PingOne. See 
+documentation here: [Identity Linking Documentation](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/IdentityLinking.md)
 ---
 
 ## ⚙️ Getting Started Locally
