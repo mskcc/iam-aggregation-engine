@@ -75,21 +75,25 @@ public class IdentityLinkingColleague : IColleague
 
         if (payload?.NotificationType is nameof(PingFederateIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(PingFederateIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromPingFederate(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(EntraIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(EntraIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromEntraId(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(LdapGatewayIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(LdapGatewayIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromLdapGateway(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(LinkAllTargetsForIdentityNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(LinkAllTargetsForIdentityNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromPingFederate(samAccountName));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromEntraId(samAccountName));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.LinkIdentityFromLdapGateway(samAccountName));
@@ -97,26 +101,31 @@ public class IdentityLinkingColleague : IColleague
 
         if (payload?.NotificationType is nameof(UnlinkAccountIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(UnlinkAccountIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkAllIdentityProviderAccounts(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(UnlinkPingFederateIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(UnlinkPingFederateIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkIdentityFromPingFederate(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(UnlinkEntraIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(UnlinkEntraIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkIdentityFromEntraId(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(UnlinkLdapGatewayIdentityLinkingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(UnlinkLdapGatewayIdentityLinkingNotification));
             _backgroundJobClient.Enqueue(() => _identityLinkingService.UnlinkIdentityFromLdapGateway(samAccountName));
         }
 
         if (payload?.NotificationType is nameof(StartIdentityLinkingBatchProcessingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(StartIdentityLinkingBatchProcessingNotification));
             _recurringJobManager.AddOrUpdate(
                 HangfireConstants.StartIdentityLinkingProcessingRecurringJobId, 
                 () => _identityLinkingService.ProcessIdentityLinkingRequestQueue(),
@@ -125,6 +134,7 @@ public class IdentityLinkingColleague : IColleague
 
         if (payload?.NotificationType is nameof(StopIdentityLinkingBatchProcessingNotification))
         {
+            _logger.LogInformation("Identity Linking Colleague Receives: {Notification}", nameof(StopIdentityLinkingBatchProcessingNotification));
             _recurringJobManager.RemoveIfExists(HangfireConstants.StartIdentityLinkingProcessingRecurringJobId);
         }
 
@@ -132,7 +142,7 @@ public class IdentityLinkingColleague : IColleague
 
         return Task.FromResult<object>(new Response<IdentityLinkingResponse>()
         {
-            Message = $"Identity link creation for {samAccountName} started on {DateTime.Now.ToLocalTime()}"
+            Message = $"Identity Linking Engine job scheduled on {DateTime.Now.ToLocalTime()}"
         });
     }
 }

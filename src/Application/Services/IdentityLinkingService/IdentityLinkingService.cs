@@ -357,10 +357,29 @@ public class IdentityLinkingService : IIdentityLinkingService
                 Attempts = requestedIdentity.Attempts,
                 LastProcessingAttempt = requestedIdentity.LastProcessingAttempt
             };
+
             await identityLinkingProcessingReqeustArchiveDbSet.AddAsync(identityLinkingProcessingReqeustArchive);
+
+            _logger.LogInformationToSql(
+                logMessage: $"Bulk processing - Successfully processed {requestedIdentity.SamAccountName}.",
+                args: null,
+                requestId: requestedIdentity.Id.ToString(),
+                pingOneUserId: requestedIdentity.PingOneUserId,
+                environment: _hostEnvironment.EnvironmentName,
+                status: "Success",
+                detail: string.Empty);
         }
 
         await _applicationDbContext.SaveChangesAsync();
+
+        _logger.LogInformationToSql(
+            logMessage: $"Bulk processing - Successfully processed {requestedIdentitiesForProcessing.Count} identities.",
+            args: null,
+            requestId: string.Empty,
+            pingOneUserId: string.Empty,
+            environment: _hostEnvironment.EnvironmentName,
+            status: "Success",
+            detail: string.Empty);
         
         return new IdentityLinkingResponse
         {
