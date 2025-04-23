@@ -277,16 +277,16 @@ public static class IdentityLinkingEngineEndpoints
     /// <param name="notifyIdentityLinkingColleague"></param>
     /// <returns></returns>
     public static async Task<IResult> StartProcessingLinkAllBatchIdentities(
-        [FromServices] NotifyIdentityLinkingColleague notifyIdentityLinkingColleague)
+        [FromServices] NotifyIdentityLinkingEngineJobColleague notifyIdentityLinkingEngineJobColleague)
     {
-        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingColleague);
+        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingEngineJobColleague);
 
         var linkingObject = new StartIdentityLinkingBatchProcessingNotification
         {
             NotificationType = nameof(StartIdentityLinkingBatchProcessingNotification)
         };
 
-        var result = await notifyIdentityLinkingColleague.Notify(linkingObject);
+        var result = await notifyIdentityLinkingEngineJobColleague.Notify(linkingObject);
         
         return Results.Accepted(string.Empty, result);
     }
@@ -297,16 +297,16 @@ public static class IdentityLinkingEngineEndpoints
     /// <param name="notifyIdentityLinkingColleague"></param>
     /// <returns></returns>
     public static async Task<IResult> StopProcessingLinkAllBatchIdentities(
-        [FromServices] NotifyIdentityLinkingColleague notifyIdentityLinkingColleague)
+        [FromServices] NotifyIdentityLinkingEngineJobColleague notifyIdentityLinkingEngineJobColleague)
     {
-        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingColleague);
+        ArgumentNullException.ThrowIfNull(notifyIdentityLinkingEngineJobColleague);
 
         var linkingObject = new StopIdentityLinkingBatchProcessingNotification
         {
             NotificationType = nameof(StopIdentityLinkingBatchProcessingNotification)
         };
 
-        var result = await notifyIdentityLinkingColleague.Notify(linkingObject);
+        var result = await notifyIdentityLinkingEngineJobColleague.Notify(linkingObject);
         
         return Results.Accepted(string.Empty, result);
     }
