@@ -164,4 +164,9 @@ public class ApiOptions
     /// Options for the name of the table to get identity processing requests from in the configured database.
     /// </summary>
     public string? BulkProcessingBatchSchedule { get; set; }
+
+    /// <summary>
+    /// Maximum number of retries for identity linking processing.
+    /// </summary>
+    public int MaxNumberOfIdentityLinkingRetries { get; set; } = 5;
 }

@@ -85,4 +85,9 @@ public interface IResourceStateService
     /// This property is thread-safe.
     /// </remarks>
     public bool IsServiceNowUsersPurgingRunning { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the Identity Engine job is currently running.
+    /// </summary>
+    public bool IsIdentityEngineJobRunning { get; set; }
 }
