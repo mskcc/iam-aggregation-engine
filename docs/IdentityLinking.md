@@ -59,7 +59,7 @@ Each environment instance manages it's own tables, entities, and migrations. EF 
 
 ### Azure Users Source Table 
 
-The source for which the application identitfies microsoft netra object ids. This table in the 'appsettings.json' configuration is called: ```AzureUsersSourceTableName```.  The service uses this to lookup the entra object ID based on some basic information like samaccountname. This table is not managed by the code base and any requests to do databse migrations, environment propogation, purging, and aggregation cannot be managed through this application.  Wherever this Identity Linking Engine service runs, it needs the databse it's configured to use to be provisioned with this table or else an exception will be thrown and the operating procedure for this workflow will fail.  The table needs to be provisioned with aggregated data for the same environment that this identity linking engine service is configured for. 
+This table is the data source for the Ping_IdentityLinking_AzureUsers_Source_Managed table. This table is not managed by the code base and any requests to do databse migrations, environment propogation, purging, and aggregation cannot be managed through this application.  Wherever this Identity Linking Engine service runs, it needs the databse it's configured to use to be provisioned with this table or else an exception will be thrown and the operating procedure for this workflow will fail.  The table needs to be provisioned with aggregated data for the same environment that this identity linking engine service is configured for. 
 
 ----
 
@@ -69,6 +69,7 @@ The Identity Linking Engine service leverages EF Core to manage it's own databse
 - Ping_IdentityLinking_Processing_Request_Log
 - Ping_IdentityLinking_Processing_Request_Queue
 - Ping_IdentityLinking_Processing_Request_Archive
+- Ping_IdentityLinking_AzureUsers_Source_Managed
 
 ----
 
@@ -140,6 +141,37 @@ This table is written to by the service when the Bulk/Batch Processing Job API E
 | **IsProcessedSuccessfully** | `BOOLEAN`     | Indicates whether the record has been processed successfully. |
 
 ----
+
+#### Ping_IdentityLinking_AzureUsers_Source_Managed  
+This table is used by the identity linking engine service to reference Microsoft Entra ID (formerly Azure AD) user data for identity processing tasks, such as matching or linking during bulk or batch jobs.
+
+| Column Name                   | Data Type         | Description |
+|-------------------------------|-------------------|-------------|
+| **Id**                        | `UNIQUEIDENTIFIER`| Primary key; uniquely identifies each record. |
+| **DisplayName**               | `VARCHAR`         | Full name as displayed in Microsoft Entra ID. |
+| **GivenName**                 | `VARCHAR`         | User’s first name. |
+| **JobTitle**                  | `VARCHAR`         | User’s job title as recorded in Entra ID. |
+| **Mail**                      | `VARCHAR`         | User’s primary email address. |
+| **MobilePhone**              | `VARCHAR`         | User’s mobile phone number. |
+| **OfficeLocation**            | `VARCHAR`         | Physical office location of the user. |
+| **PreferredLanguage**         | `VARCHAR`         | User's preferred language. |
+| **Surname**                   | `VARCHAR`         | User’s last name or family name. |
+| **UserPrincipalName**         | `VARCHAR`         | Unique sign-in name, typically in email format. |
+| **AccountEnabled**            | `BOOLEAN`         | Indicates whether the account is active and enabled. |
+| **EmployeeId**                | `VARCHAR`         | Employee identifier, typically from HR systems. |
+| **Department**                | `VARCHAR`         | Department the user belongs to. |
+| **CreatedDateTime**           | `DATETIME`        | Timestamp of when the Entra ID account was created. |
+| **OnPremisesDistinguishedName** | `VARCHAR`     | Distinguished Name of the user in on-prem AD. |
+| **OnPremisesDomainName**      | `VARCHAR`         | Domain name from the on-premises Active Directory. |
+| **OnPremisesLastSyncDateTime**| `DATETIME`        | Timestamp of the last successful sync with on-prem AD. |
+| **OnPremisesSamAccountName**  | `VARCHAR`         | SAM account name from the on-premises AD. |
+| **OnPremisesSecurityIdentifier** | `VARCHAR`     | Security Identifier  from on-premises AD. |
+| **OnPremisesSyncEnabled**     | `BOOLEAN`         | Indicates if sync with on-prem AD is enabled. |
+| **OnPremisesUserPrincipalName** | `VARCHAR`      | UPN from on-premises AD. |
+| **UserType**                  | `VARCHAR`         | Type of user. |
+| **UsageLocation**             | `VARCHAR`         | Geographic location of the user. |
+
+---
 
 ## API Endpoints for Identity Linking
 This section will go over the available API endpoints used to link identities and which API endpoints are used for this identity linking workflow: [Lucid Flowchart](https://github.com/mskcc/iam-aggregation-engine/blob/main/docs/PingRequest_Engine.png). 
