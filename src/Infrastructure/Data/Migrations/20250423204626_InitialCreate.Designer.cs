@@ -12,8 +12,8 @@ using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250226184327_SupportServiceNowUsers")]
-    partial class SupportServiceNowUsers
+    [Migration("20250423204626_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,6 +60,177 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                     b.HasIndex("SpConnectionPrimaryKey");
 
                     b.ToTable("IDM_PingID_Attributes_List");
+                });
+
+            modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.AzureUsersSource", b =>
+                {
+                    b.Property<string>("AccountEnabled")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Department")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GivenName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Mail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MobilePhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OfficeLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OnPremisesDistinguishedName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OnPremisesDomainName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("OnPremisesLastSyncDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OnPremisesSamAccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OnPremisesSecurityIdentifier")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OnPremisesSyncEnabled")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OnPremisesUserPrincipalName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PreferredLanguage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsageLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserPrincipalName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("Ping_IdentityLinking_AzureUsers_Source_Managed", (string)null);
+                });
+
+            modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.IdentityLinkingProcessingReqeustArchive", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntraObjectId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Environment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsProcessedSuccessfully")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastProcessingAttempt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PingOneUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SamAccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ping_IdentityLinking_Processing_Request_Archive");
+                });
+
+            modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.IdentityLinkingProcessingReqeustQueue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EntraObjectId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Environment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsProcessedSuccessfully")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastProcessingAttempt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PingOneUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SamAccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ping_IdentityLinking_Processing_Request_Queue");
                 });
 
             modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.LegacyConnection", b =>
@@ -313,6 +484,10 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApiAccountLifeCycleManagement")
+                        .HasColumnType("nvarchar(max)")
+                        .HasAnnotation("Relational:JsonPropertyName", "u_api_acct_life_cycle_mgmt");
+
                     b.Property<string>("ApplicationCategory")
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "application_category");
@@ -324,6 +499,10 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                     b.Property<string>("ArchitectureType")
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "architecture_type");
+
+                    b.Property<string>("AuthenticationProtocols")
+                        .HasColumnType("nvarchar(max)")
+                        .HasAnnotation("Relational:JsonPropertyName", "u_authentication_protocols");
 
                     b.Property<string>("BusinessCriticality")
                         .HasColumnType("nvarchar(max)")
@@ -349,9 +528,17 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "install_type");
 
+                    b.Property<string>("IsExternallyFacing")
+                        .HasColumnType("nvarchar(max)")
+                        .HasAnnotation("Relational:JsonPropertyName", "u_is_externally_facing");
+
                     b.Property<string>("ItApplicationOwner")
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "it_application_owner");
+
+                    b.Property<string>("LifeCycleStageStatus")
+                        .HasColumnType("nvarchar(max)")
+                        .HasAnnotation("Relational:JsonPropertyName", "life_cycle_stage_status");
 
                     b.Property<string>("ManagedBy")
                         .HasColumnType("nvarchar(max)")
@@ -392,6 +579,10 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                     b.Property<string>("UserBase")
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "user_base");
+
+                    b.Property<string>("UsesEnterpriseIdentitiesNetworkId")
+                        .HasColumnType("nvarchar(max)")
+                        .HasAnnotation("Relational:JsonPropertyName", "u_uses_enterprise_identities_network_id");
 
                     b.Property<string>("Vendor")
                         .HasColumnType("nvarchar(max)")

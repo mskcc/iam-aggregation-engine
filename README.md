@@ -95,6 +95,10 @@ This is an indication that there is a configuration issue during ef miggrations.
 dotnet ef migrations add InitialCreate --output-dir ../Infrastructure/Data/Migrations --project ../Infrastructure/Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.csproj
 ```
 
+```bash
+dotnet ef database update --project ../Infrastructure/Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.csproj --startup-project . --context ApplicationDbContext
+```
+
 ## 🌟 API Endpoints
 All API endpoints require authorization.
 

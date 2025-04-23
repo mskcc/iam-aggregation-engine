@@ -130,7 +130,7 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                     b.Property<string>("UserType")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("...", (string)null);
+                    b.ToTable("Ping_IdentityLinking_AzureUsers_Source_Managed", (string)null);
                 });
 
             modelBuilder.Entity("Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities.IdentityLinkingProcessingReqeustArchive", b =>
