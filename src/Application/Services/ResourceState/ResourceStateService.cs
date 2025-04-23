@@ -18,6 +18,7 @@ public class ResourceStateService : IResourceStateService
     private bool _ServiceNowApplicationsPurgeRunning;
     private bool _ServiceNowUsersAggregationRunning;
     private bool _ServiceNowUsersPurgeRunning;
+    private bool _IsIdentityEngineJobRunning;
 
     /// <summary>
     /// Create an instance of <see cref="ResourceStateService"/>
@@ -364,6 +365,40 @@ public class ResourceStateService : IResourceStateService
             {
                 _lock.ExitWriteLock();
                 _logger.LogDebug("Exiting write lock for _ServiceNowUsersPurgeRunning");
+            }
+        }
+    }
+
+/// <inheritdoc/>
+    public bool IsIdentityEngineJobRunning 
+    { 
+        get
+        {
+            _logger.LogDebug("Entering read lock for _IsIdentityEngineJobRunning");
+            _lock.EnterReadLock();
+            try
+            {
+                return _IsIdentityEngineJobRunning;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+                _logger.LogDebug("Exiting read lock for _IsIdentityEngineJobRunning");
+            }
+        }
+
+        set
+        {
+            _logger.LogDebug("Entering write lock for _IsIdentityEngineJobRunning");
+            _lock.EnterWriteLock();
+            try
+            {
+                _IsIdentityEngineJobRunning = value;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+                _logger.LogDebug("Exiting write lock for _IsIdentityEngineJobRunning");
             }
         }
     }
