@@ -10,6 +10,7 @@ using Serilog;
 using Serilog.Sinks.MSSqlServer;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Constants;
 using System.Collections.ObjectModel;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.ExternalData;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Extensions;
 
@@ -130,6 +131,8 @@ public static class WebApplicationBuilderExtensions
 
         var connectionString = builder.Configuration.GetConnectionString("SqlConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(opt => 
+            opt.UseSqlServer(connectionString));
+        builder.Services.AddDbContext<ExternalDbContext>(opt => 
             opt.UseSqlServer(connectionString));
 
         return builder;

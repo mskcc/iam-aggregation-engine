@@ -36,11 +36,31 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                     InstallStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SupportGroup = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SupportedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Vendor = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Vendor = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LifeCycleStageStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UsesEnterpriseIdentitiesNetworkId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AuthenticationProtocols = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApiAccountLifeCycleManagement = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsExternallyFacing = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_APM_ServiceNow_Applications_Info", x => x.PrimaryKey);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "APM_ServiceNow_Users_Info",
+                columns: table => new
+                {
+                    PrimaryKey = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SysId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_APM_ServiceNow_Users_Info", x => x.PrimaryKey);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,6 +207,85 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Ping_IdentityLinking_AzureUsers_Source_Managed",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GivenName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JobTitle = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Mail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MobilePhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OfficeLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PreferredLanguage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Surname = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserPrincipalName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AccountEnabled = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Department = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    OnPremisesDistinguishedName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OnPremisesDomainName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OnPremisesLastSyncDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    OnPremisesSamAccountName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OnPremisesSecurityIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OnPremisesSyncEnabled = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OnPremisesUserPrincipalName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UsageLocation = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Ping_IdentityLinking_Processing_Request_Archive",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequestId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastProcessingAttempt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Environment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PingOneUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EntraObjectId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SamAccountName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Attempts = table.Column<int>(type: "int", nullable: true),
+                    Source = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsProcessedSuccessfully = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ping_IdentityLinking_Processing_Request_Archive", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Ping_IdentityLinking_Processing_Request_Queue",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastProcessingAttempt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Environment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PingOneUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EntraObjectId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SamAccountName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Attempts = table.Column<int>(type: "int", nullable: true),
+                    Source = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsProcessedSuccessfully = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ping_IdentityLinking_Processing_Request_Queue", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "IDM_PingID_Attributes_List",
                 columns: table => new
                 {
@@ -234,6 +333,9 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
                 name: "APM_ServiceNow_Applications_Info");
 
             migrationBuilder.DropTable(
+                name: "APM_ServiceNow_Users_Info");
+
+            migrationBuilder.DropTable(
                 name: "IDM_PingID_Attributes_List");
 
             migrationBuilder.DropTable(
@@ -241,6 +343,15 @@ namespace Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "IDM_PingID_Connections_List");
+
+            migrationBuilder.DropTable(
+                name: "Ping_IdentityLinking_AzureUsers_Source_Managed");
+
+            migrationBuilder.DropTable(
+                name: "Ping_IdentityLinking_Processing_Request_Archive");
+
+            migrationBuilder.DropTable(
+                name: "Ping_IdentityLinking_Processing_Request_Queue");
 
             migrationBuilder.DropTable(
                 name: "IDM_PIngID_SAML_Information");
