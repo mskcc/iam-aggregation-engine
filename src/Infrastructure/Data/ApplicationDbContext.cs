@@ -164,7 +164,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<AzureUsersSource>(entity =>
         {
             entity.HasNoKey();
-            entity.ToTable(_apiOptions.AzureUsersSourceTableName);
+            entity.ToTable(_apiOptions.AzureUsersSourceTableManagedName);
         });
         
         base.OnModelCreating(modelBuilder);

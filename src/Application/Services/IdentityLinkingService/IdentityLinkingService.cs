@@ -1,4 +1,3 @@
-using System.ComponentModel.Design;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,6 +9,7 @@ using Mskcc.Tools.Idp.ConnectionsAggregator.Domain.Entities;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Configuration;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Data;
 using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.Extensions;
+using Mskcc.Tools.Idp.ConnectionsAggregator.Infrastructure.ExternalData;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Services.IdentityLinkingService;
 
@@ -22,6 +22,7 @@ public class IdentityLinkingService : IIdentityLinkingService
     private readonly ApiOptions _apiOptions;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly IResourceStateService _resourceStateService;
+    private readonly ExternalDbContext _externalDbContext;
 
     /// <summary>
     /// Creates an instance of <see cref="IdentityLinkingService"/>
@@ -37,7 +38,8 @@ public class IdentityLinkingService : IIdentityLinkingService
         ApplicationDbContext applicationDbContext,
         IOptionsMonitor<ApiOptions> apiOptionsMonitor,
         IHostEnvironment hostEnvironment,
-        IResourceStateService resourceStateService
+        IResourceStateService resourceStateService,
+        ExternalDbContext externalDbContext
     )
     {
         ArgumentNullException.ThrowIfNull(logger);
@@ -46,6 +48,7 @@ public class IdentityLinkingService : IIdentityLinkingService
         ArgumentNullException.ThrowIfNull(apiOptionsMonitor);
         ArgumentNullException.ThrowIfNull(hostEnvironment);
         ArgumentNullException.ThrowIfNull(resourceStateService);
+        ArgumentNullException.ThrowIfNull(externalDbContext);
 
         _logger = logger;
         _pingOneService = pingOneService;
@@ -53,8 +56,10 @@ public class IdentityLinkingService : IIdentityLinkingService
         _apiOptions = apiOptionsMonitor.Get(ApiOptions.SectionKey);
         _hostEnvironment = hostEnvironment;
         _resourceStateService = resourceStateService;
+        _externalDbContext = externalDbContext;
 
-        _azureUsersSource = applicationDbContext.Set<AzureUsersSource>();
+        //_azureUsersSource = applicationDbContext.Set<AzureUsersSource>();
+        _azureUsersSource = externalDbContext.AzureUsersSource;
     }
 
     /// <inheritdoc/>
@@ -419,16 +424,6 @@ public class IdentityLinkingService : IIdentityLinkingService
         };
     }
 
-    private async Task<string> GetMicrosoftObjectId(string samAccountName)
-    {
-        var azureUser = await _azureUsersSource
-            .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.OnPremisesSamAccountName == samAccountName);
-        ArgumentNullException.ThrowIfNull(azureUser?.Id);
-
-        return azureUser.Id;
-    }
-
     /// <inheritdoc/>
     public async Task<IdentityLinkingResponse> UnlinkIdentityFromPingFederate(string samAccountName)
     {
@@ -556,5 +551,15 @@ public class IdentityLinkingService : IIdentityLinkingService
         {
             IsUnlinkningSuccessful = true
         };
+    }
+
+    private async Task<string> GetMicrosoftObjectId(string samAccountName)
+    {
+        var azureUser = await _azureUsersSource
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.OnPremisesSamAccountName == samAccountName);
+        ArgumentNullException.ThrowIfNull(azureUser?.Id);
+
+        return azureUser.Id;
     }
 }
