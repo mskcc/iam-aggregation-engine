@@ -58,6 +58,9 @@ Each environment instance manages it's own tables, entities, and migrations. EF 
 ----
 
 ### Azure Users Source Table 
+This table is only used when running ad-hoc microsoft entra id linking via the API endpoint.
+
+----
 
 This table is the data source for the Ping_IdentityLinking_AzureUsers_Source_Managed table. This table is not managed by the code base and any requests to do databse migrations, environment propogation, purging, and aggregation cannot be managed through this application.  Wherever this Identity Linking Engine service runs, it needs the databse it's configured to use to be provisioned with this table or else an exception will be thrown and the operating procedure for this workflow will fail.  The table needs to be provisioned with aggregated data for the same environment that this identity linking engine service is configured for. 
 
@@ -69,7 +72,7 @@ The Identity Linking Engine service leverages EF Core to manage it's own databse
 - Ping_IdentityLinking_Processing_Request_Log
 - Ping_IdentityLinking_Processing_Request_Queue
 - Ping_IdentityLinking_Processing_Request_Archive
-- Ping_IdentityLinking_AzureUsers_Source_Managed
+- Ping_IdentityLinking_AzureUsers_Source_Managed (Not currently used anymore)
 
 ----
 
@@ -142,7 +145,7 @@ This table is written to by the service when the Bulk/Batch Processing Job API E
 
 ----
 
-#### Ping_IdentityLinking_AzureUsers_Source_Managed  
+#### Ping_IdentityLinking_AzureUsers_Source_Managed (This table is not currently used anymore)
 This table is used by the identity linking engine service to reference Microsoft Entra ID (formerly Azure AD) user data for identity processing tasks, such as matching or linking during bulk or batch jobs.
 
 | Column Name                   | Data Type         | Description |
