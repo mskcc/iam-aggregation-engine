@@ -18,6 +18,7 @@ public class PingFederateServiceTests
     private readonly Mock<IHttpClientFactory> _mockHttpClientFactory;
     private readonly Mock<IResourceStateService> _mockResourceStateService;
     private readonly Mock<IOptionsMonitor<PingFederateOptions>> _mockPingFederateOptions;
+    private readonly Mock<IOptionsMonitor<ApiOptions>> _mockApiOptions;
     private readonly ApplicationDbContext _dbContext;
     private readonly PingFederateService _service;
 
@@ -36,12 +37,15 @@ public class PingFederateServiceTests
         // Setup mock ping federate options
         _mockPingFederateOptions = new Mock<IOptionsMonitor<PingFederateOptions>>();
 
+        // Setup mock options 
+        _mockApiOptions = new Mock<IOptionsMonitor<ApiOptions>>();
+
         // In-memory DB context setup
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase("TestDb")
             .Options;
 
-        _dbContext = new ApplicationDbContext(options, _mockDbContextLogger.Object);
+        _dbContext = new ApplicationDbContext(options, _mockApiOptions.Object, _mockDbContextLogger.Object);
 
         // Setup Mock ResourceStateService
         _mockResourceStateService = new Mock<IResourceStateService>();
