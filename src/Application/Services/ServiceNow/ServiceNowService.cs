@@ -179,63 +179,128 @@ public class ServiceNowService : IServiceNowService
         _logger.LogInformation("Completed purging Service Now applications from the database");
     }
 
-    /// <inheritdoc/>
-    public async Task<IEnumerable<ServiceNowUser>> AggregateServiceNowUsersAsync()
+    private static bool IsNextPageAvailable(HttpResponseMessage httpResponseMessage)
     {
+        var headers = httpResponseMessage.Headers;
+        var links = headers.GetValues("Link").SingleOrDefault()?.ToString();
+        
+        if (string.IsNullOrEmpty(links))
+        {
+            return false;
+        }
+
+        return links.Contains("rel=\"next\"");
+    }
+
+    private static string GetNextPageLink(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("Link", out var links)
+            ? links
+                .SelectMany(l => l.Split(','))
+                .Select(link => link.Split(';'))
+                .Where(parts => parts.Length >= 2 && parts[1].Trim() is "rel=\"next\"")
+                .Select(parts => parts[0].Trim('<', '>', ' '))
+                .FirstOrDefault() ?? string.Empty
+            : string.Empty;
+
+    private async Task<IEnumerable<ServiceNowUser>> AggregateServiceNowUsersWithPaginatoinAsync(string pageLink)
+    {
+        // TODO: Refactor this code to use a more generic method for pagination
         _logger.LogInformation("Starting aggregation of service now users.");
         _resourceStateService.IsServiceNowUsersAggregationRunning = true;
         _logger.LogInformation("Creating a new HTTP client for interfacing with the Service Now API");
         var serviceNowHttpClient = _httpClientFactory.CreateClient(HttpClientNames.ServiceNowClient);
-        var serviceNowUsersItemsJson = await serviceNowHttpClient
-            .GetFromJsonAsync<ServiceNowUsersItemsJson>(_serviceNowOptions.UsersEndpoint);
+        var serviceNowUsersHttpResponse = await serviceNowHttpClient
+            .GetAsync(pageLink);
+        ArgumentNullException.ThrowIfNull(serviceNowUsersHttpResponse);
+        var serviceNowUsersItemsJson = await serviceNowUsersHttpResponse.Content
+            .ReadFromJsonAsync<ServiceNowUsersItemsJson>();
         ArgumentNullException.ThrowIfNull(serviceNowUsersItemsJson);
 
-        DbSet<ServiceNowUser>? serviceNowUsers;
-
-        try
+        var serviceNowUsersItemsJsonList = new List<ServiceNowUsersItemsJson>
         {
-            serviceNowUsers = _context.Set<ServiceNowUser>();
-            ArgumentNullException.ThrowIfNull(serviceNowUsers);
+            serviceNowUsersItemsJson
+        };
 
-            var serviceNowUsersJson = serviceNowUsersItemsJson.Result?.ToList();
-            ArgumentNullException.ThrowIfNull(serviceNowUsersJson);
-
-            foreach(var user in serviceNowUsersJson)
+        if (IsNextPageAvailable(serviceNowUsersHttpResponse))
+        {
+            var isNextPageAvailable = true;
+            while(isNextPageAvailable)
             {
-                var existingUser = serviceNowUsers
-                    .AsNoTracking()
-                    .AsSplitQuery()
-                    .SingleOrDefault(u => u.SysId == user.SysId);
-
-                if (existingUser is not null)
+                var nextPageLink = GetNextPageLink(serviceNowUsersHttpResponse);
+                serviceNowUsersHttpResponse = await serviceNowHttpClient
+                    .GetAsync(nextPageLink);
+                ArgumentNullException.ThrowIfNull(serviceNowUsersHttpResponse);
+                serviceNowUsersItemsJson = await serviceNowUsersHttpResponse.Content
+                    .ReadFromJsonAsync<ServiceNowUsersItemsJson>();
+                
+                if (serviceNowUsersItemsJson is not null)
                 {
-                    _logger.LogDebug("Service Now user with employee id '{EmployeeId}' already exists in the database", user.EmployeeNumber);
-                    _logger.LogInformation("Updating the existing Service Now user with employee id '{EmployeeId}'", user.EmployeeNumber);
-
-                    existingUser.MapFrom(user);
-                    serviceNowUsers.Update(existingUser);
-
-                    continue;
+                    serviceNowUsersItemsJsonList.Add(serviceNowUsersItemsJson);
                 }
 
-                _logger.LogDebug("Service Now user with employee id '{EmployeeId}' does not exist in the database", user.EmployeeNumber);
-                _logger.LogInformation("Adding the new Service Now user with employee id '{EmployeeId}'", user.EmployeeNumber);
-                ServiceNowUser newServiceNowUser = new();
-                newServiceNowUser.MapFrom(user);
-                await serviceNowUsers.AddAsync(newServiceNowUser);
+                isNextPageAvailable = IsNextPageAvailable(serviceNowUsersHttpResponse);
             }
-
-            _logger.LogDebug("Saving changes to the database");
-            await _context.SaveChangesAsync();
         }
-        finally
+        
+        ArgumentNullException.ThrowIfNull(serviceNowUsersItemsJson);
+        ArgumentNullException.ThrowIfNull(serviceNowUsersItemsJsonList);
+
+        DbSet<ServiceNowUser> serviceNowUsers = null!;
+        
+        foreach(var serviceNowUsersItemsJsonChunk in serviceNowUsersItemsJsonList)
         {
-            _resourceStateService.IsServiceNowUsersAggregationRunning = false;
+            try
+            {
+                serviceNowUsers = _context.Set<ServiceNowUser>();
+                ArgumentNullException.ThrowIfNull(serviceNowUsers);
+
+                var serviceNowUsersJson = serviceNowUsersItemsJsonChunk.Result?.ToList();
+                ArgumentNullException.ThrowIfNull(serviceNowUsersJson);
+
+                foreach(var user in serviceNowUsersJson)
+                {
+                    var existingUser = serviceNowUsers
+                        .AsNoTracking()
+                        .AsSplitQuery()
+                        .SingleOrDefault(u => u.SysId == user.SysId);
+
+                    if (existingUser is not null)
+                    {
+                        _logger.LogDebug("Service Now user with employee id '{EmployeeId}' already exists in the database", user.EmployeeNumber);
+                        _logger.LogInformation("Updating the existing Service Now user with employee id '{EmployeeId}'", user.EmployeeNumber);
+
+                        existingUser.MapFrom(user);
+                        serviceNowUsers.Update(existingUser);
+
+                        continue;
+                    }
+
+                    _logger.LogDebug("Service Now user with employee id '{EmployeeId}' does not exist in the database", user.EmployeeNumber);
+                    _logger.LogInformation("Adding the new Service Now user with employee id '{EmployeeId}'", user.EmployeeNumber);
+                    ServiceNowUser newServiceNowUser = new();
+                    newServiceNowUser.MapFrom(user);
+                    await serviceNowUsers.AddAsync(newServiceNowUser);
+                }
+
+                _logger.LogDebug("Saving changes to the database");
+                await _context.SaveChangesAsync();
+            }
+            finally
+            {
+                _resourceStateService.IsServiceNowUsersAggregationRunning = false;
+            }
         }
 
         _resourceStateService.IsServiceNowUsersAggregationRunning = false;
         _logger.LogInformation("Completed aggregation of service now users.");
+
         return serviceNowUsers.ToList().AsReadOnly();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<ServiceNowUser>> AggregateServiceNowUsersAsync()
+    {
+        return await AggregateServiceNowUsersWithPaginatoinAsync(_serviceNowOptions.UsersEndpoint);
     }
 
     /// <inheritdoc/>
