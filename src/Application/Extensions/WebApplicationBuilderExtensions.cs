@@ -76,6 +76,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddKeyedTransient<IColleague, IdentityLinkingColleague>(ServiceKeys.IdentityLinkingColleague);
         builder.Services.AddKeyedTransient<IColleague, IdentityLinkingEngineJobColleague>(ServiceKeys.IdentityLinkingEngineJobColleague);
 
+        builder.Services.AddKeyedTransient<IColleague, PingFederateInsightsColleague>(ServiceKeys.PingFederateInsightsColleague);
+
         // Register Notifications
         builder.Services.AddTransient<NotifyPurgeOidcColleague>();
         builder.Services.AddTransient<NotifyAggregateOidcConnectionsColleague>();
@@ -100,6 +102,8 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddTransient<NotifyIdentityLinkingColleague>();
         builder.Services.AddTransient<NotifyIdentityLinkingEngineJobColleague>();
+
+        builder.Services.AddTransient<NotifyPingFederateInsightsColleague>();
 
         return builder;
     }
@@ -408,6 +412,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddSingleton<IPaginationService, PaginationService>();
 
         // Scoped services
+        builder.Services.AddScoped<IPingFederateInsightService, PingFederateInsightService>();
         builder.Services.AddScoped<IPagedResponseService<SpConnection>, PagedResponseService<SpConnection>>();
         builder.Services.AddScoped<IPagedResponseService<OidcClient>, PagedResponseService<OidcClient>>();
         builder.Services.AddScoped<IPagedResponseService<LegacyConnection>, PagedResponseService<LegacyConnection>>();
