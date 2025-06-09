@@ -47,12 +47,14 @@ public class PingFederateInsightService : IPingFederateInsightService
     {
         var oidcConnections = await _pingFederateService.GetOidcConnectionsAsync();
         var oidcConnectionsWithMissingApmNumber = oidcConnections
-            .Where(oidcConnection => string.IsNullOrEmpty(oidcConnection.Description) is false || oidcConnection.Description?.ToLower().Contains("apm") is false)
+            .Where(oidcConnection => string.IsNullOrEmpty(oidcConnection.Description) is false ||
+                oidcConnection.Description?.ToLower().Contains("apm") is false)
             .ToList();
         
         var spConnections = await _pingFederateService.GetSpConnectionsAsync();
         var spConnectionsWithMissingApmNumber = spConnections
-            .Where(spConnection => string.IsNullOrEmpty(spConnection.ContactInfoNumber) is false || spConnection.ContactInfoNumber?.ToLower().Contains("apm") is false)
+            .Where(spConnection => string.IsNullOrEmpty(spConnection.ContactInfoNumber) is false ||
+                 spConnection.ContactInfoNumber?.ToLower().Contains("apm") is false)
             .ToList();
         
         ArgumentNullException.ThrowIfNull(spConnectionsWithMissingApmNumber);
@@ -120,8 +122,40 @@ public class PingFederateInsightService : IPingFederateInsightService
     /// <inheritdoc/>
     public async Task<InsightResponse> GetConfigurationsWithMissingBusinessOwnersInsightsAsync()
     {
-        // For OIDC programatically, what is considered a missing owner? No @ symbols? only 1 @ symbol? Issue is both technical owners and business owners meet criteria. 
-        // Only solution is to rely on the sequential ordering of the delimited entries.
+        var oidcConnections = await _pingFederateService.GetOidcConnectionsAsync();
+        var oidcConnectionsWithDescriptions = oidcConnections
+            .Where(oidcConnection => string.IsNullOrEmpty(oidcConnection.Description) is false)
+            .ToList();
+
+        var oidcConnectionsWithMissingBusinessOwners = new List<OidcClient>();
+        foreach (var oidcConnection in oidcConnectionsWithDescriptions)
+        {
+            var description = oidcConnection.Description;
+
+            if (string.IsNullOrEmpty(description))
+            {
+                continue;
+            }
+
+            if (description?.ToLower().Contains("@mskcc.org") is false)
+            {
+                oidcConnectionsWithMissingBusinessOwners.Add(oidcConnection);
+                continue;
+            }
+
+            // Business Procedure assumptions: The first part is SCTASK number, the second part is the business owner, 
+            // the third part is the technical owner and last part is the APM number.
+            // Since there is no guarantee that the description will always be in this format, 
+            // we need to check if the technical owner is present with manual hardcoed parameters.
+            var descriptionParts = GetDescriptionParts(description!);
+            var technicalOwner = descriptionParts.Count > 1 ? descriptionParts[1] : string.Empty;
+
+            if (string.IsNullOrEmpty(technicalOwner) || technicalOwner.ToLower().Contains("@mskcc.org") is false)
+            {
+                oidcConnectionsWithMissingBusinessOwners.Add(oidcConnection);
+                continue;
+            }
+        }
         
         var spConnections = await _pingFederateService.GetSpConnectionsAsync();
         var spConnectionsWithMissingOwners = spConnections
@@ -132,7 +166,8 @@ public class PingFederateInsightService : IPingFederateInsightService
         
         return new InsightResponse
         {
-            SpConnectionsWithMissingBusinessOwners = spConnectionsWithMissingOwners
+            SpConnectionsWithMissingBusinessOwners = spConnectionsWithMissingOwners,
+            OidcConnectionsWithMissingBusinessOwners = oidcConnectionsWithMissingBusinessOwners
         };
     }
     /// <inheritdoc/>

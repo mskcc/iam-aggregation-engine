@@ -71,6 +71,10 @@ public class PingFederateInsightsColleague : IColleague
         {
             insightResponse = await _pingFederateInsightService.GetConfigurationsWithMissingTechnicalOwnersInsightsAsync();
         }
+        if (notificationType is InsightsPayload.MissinBusinessOwners)
+        {
+            insightResponse = await _pingFederateInsightService.GetConfigurationsWithMissingBusinessOwnersInsightsAsync();
+        }
 
         _logger.LogDebug("Get Ping Federate Insights received service key: {message}", serviceKey);
 
