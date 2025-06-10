@@ -33,6 +33,7 @@ public static class ServiceKeys
         yield return PurgeServiceNowUsersColleague;
         yield return IdentityLinkingColleague;
         yield return IdentityLinkingEngineJobColleague;
+        yield return PingFederateInsightsColleague;
     }
 
     /// <summary>
@@ -100,7 +101,7 @@ public static class ServiceKeys
     /// </summary>
     public const string PurgeServiceNowApplicationsColleague = "PurgeServiceNowApplicationsColleague";
 
-        /// <summary>
+    /// <summary>
     /// Key for AggregateServiceNowUsersColleague
     /// </summary>
     public const string AggregateServiceNowUsersColleague = "AggregateServiceNowUsersColleague";
@@ -120,5 +121,13 @@ public static class ServiceKeys
     /// </summary>
     public const string IdentityLinkingColleague = "IdentityLinkingColleague";
 
+    /// <summary>
+    /// Key for IdentityLinkingEngineJobColleague
+    /// </summary>
     public const string IdentityLinkingEngineJobColleague = "IdentityLinkingEngineJobColleague";
+    
+    /// <summary>
+    /// Key for PingFederateInsightsColleague
+    /// </summary>
+    public const string PingFederateInsightsColleague = "PingFederateInsightsColleague";
 }

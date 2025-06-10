@@ -59,11 +59,16 @@ public class PingOneService : IPingOneService
         var serializedJson = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(serializedJson, Encoding.UTF8, "application/vnd.pingidentity.password.setGateway+json");
         var ldapGatewayLinkingResponse = await _pingOneHttpClient.PutAsync(ldapGatewayLinkingUrl, content);
-        
+
         if (ldapGatewayLinkingResponse.IsSuccessStatusCode is false)
         {
-            _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, ldapGatewayLinkingResponse.StatusCode);
-            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {ldapGatewayLinkingResponse.StatusCode}");
+            _logger.LogError("Failed to link Gateaway account for user {UserId} with status code {StatusCode}", pingOneUserId, ldapGatewayLinkingResponse.StatusCode);
+            return new PingOneResponse
+            {
+                ContainsError = true,
+                ErrorMessage = $"Failed to link Entra account for user {pingOneUserId} with status code {ldapGatewayLinkingResponse.StatusCode}",
+                ErrorStatusCode = ldapGatewayLinkingResponse.StatusCode
+            };
         }
 
         var deserializedLdapGatewayLinkingResponse = await ldapGatewayLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();
@@ -95,8 +100,14 @@ public class PingOneService : IPingOneService
         
         if (microsoftEamLinkingResponse.IsSuccessStatusCode is false)
         {
-            _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, microsoftEamLinkingResponse.StatusCode);
-            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {microsoftEamLinkingResponse.StatusCode}");
+            _logger.LogError("Failed to link Entra account for user {UserId} with status code {StatusCode}", pingOneUserId, microsoftEamLinkingResponse.StatusCode);
+
+            return new PingOneResponse
+            {
+                ContainsError = true,
+                ErrorMessage = $"Failed to link Entra account for user {pingOneUserId} with status code {microsoftEamLinkingResponse.StatusCode}",
+                ErrorStatusCode = microsoftEamLinkingResponse.StatusCode
+            };
         }
 
         var deserializedMicrosoftEamLinkingResponse = await microsoftEamLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();
@@ -125,11 +136,16 @@ public class PingOneService : IPingOneService
         var serializedJson = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(serializedJson, Encoding.UTF8, "application/vnd.pingidentity.account.link+json");
         var pingFederateLinkingResponse = await _pingOneHttpClient.PostAsync(pingFederateLinkingUrl, content);
-        
+
         if (pingFederateLinkingResponse.IsSuccessStatusCode is false)
         {
             _logger.LogError("Failed to link PingFederate account for user {UserId} with status code {StatusCode}", pingOneUserId, pingFederateLinkingResponse.StatusCode);
-            throw new IdentityLinkingException($"Failed to link PingFederate account for user {pingOneUserId} with status code {pingFederateLinkingResponse.StatusCode}");
+            return new PingOneResponse
+            {
+                ContainsError = true,
+                ErrorMessage = $"Failed to link PingFederate account for user {pingOneUserId} with status code {pingFederateLinkingResponse.StatusCode}",
+                ErrorStatusCode = pingFederateLinkingResponse.StatusCode
+            };
         }
 
         var deserializedPingFederateLinkingResponse = await pingFederateLinkingResponse.Content.ReadFromJsonAsync<PingOneResponse>();

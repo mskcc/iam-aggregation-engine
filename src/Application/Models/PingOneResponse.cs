@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace Mskcc.Tools.Idp.ConnectionsAggregator.Application.Models;
@@ -30,6 +31,21 @@ public class PingOneResponse
     /// </summary>
     [JsonPropertyName("enabled")]
     public bool UserEnabled { get; set; }
+
+    /// <summary>
+    /// Indicates whether the response contains an error.
+    /// </summary>
+    public bool ContainsError { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the error message if the response contains an error.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the error status code if the response contains an error.
+    /// summary>
+    public HttpStatusCode ErrorStatusCode { get; set; }
 }
 
 /// <summary>

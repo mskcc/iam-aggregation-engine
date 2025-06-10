@@ -64,6 +64,9 @@ app.MapPingFederateSamlConnectionsEndpoints();
 app.MapPingFederateOidcConnectionsEndpoints();
 app.MapPingFederateLegacyConnectionsEndpoints();
 app.MapServiceNowEndpoints();
+app.MapPingFederateInsightsEndpoints();
+
+// Map sign in and sign out pages
 app.MapSignInAndSignOutPages();
 
 // Map Health Checks endpoint
