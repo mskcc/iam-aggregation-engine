@@ -328,19 +328,57 @@ public class IdentityLinkingService : IIdentityLinkingService
                     continue;
                 }
 
+                var ldapGatewayLinkingResponse = await _pingOneService.CreateLinkedAccountForLdapGateway(pingOneUserId, samAccountName);
+                if (ldapGatewayLinkingResponse is null)
+                {
+                    _logger.LogErrorToSql(
+                        logMessage: $"Gateway: {requestedIdentity.Id} ldapGatewayLinkingResponse is null for samAccountName: {samAccountName}",
+                        args: null,
+                        requestId: requestedIdentity.Id.ToString(),
+                        pingOneUserId: pingOneUserId,
+                        environment: _hostEnvironment.EnvironmentName,
+                        status: "Error",
+                        detail: "LdapGatewayLinkingResponse is null");
+
+                    if (ldapGatewayLinkingResponse?.ContainsError is false)
+                    {
+                        continue;
+                    }
+
+                    _logger.LogErrorToSql(
+                        logMessage: $"Gateway: request {requestedIdentity.Id} ldapGatewayLinkingResponse is null for samAccountName: {samAccountName}",
+                        args: null,
+                        requestId: requestedIdentity.Id.ToString(),
+                        pingOneUserId: pingOneUserId,
+                        environment: _hostEnvironment.EnvironmentName,
+                        status: "Error",
+                        detail: $"Status Code {ldapGatewayLinkingResponse?.ErrorStatusCode}");
+
+                    continue;
+                }
+
                 var pingFederateAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForPingFederate(pingOneUserId, samAccountName);
                 if (pingFederateAccountLinkingResponse is null)
                 {
                     _logger.LogErrorToSql(
-                        logMessage: $"RequestId: {requestedIdentity.Id} PingOneAccountLinkingResponse is null for samAccountName: {samAccountName}",
+                        logMessage: $"PingFederate: request {requestedIdentity.Id} PingOneAccountLinkingResponse is null for samAccountName: {samAccountName}",
                         args: null,
                         requestId: requestedIdentity.Id.ToString(),
                         pingOneUserId: pingOneUserId,
                         environment: _hostEnvironment.EnvironmentName,
                         status: "Error",
                         detail: "PingOneAccountLinkingResponse is null");
-
-                    continue;
+                }
+                if (pingFederateAccountLinkingResponse?.ContainsError is true)
+                {
+                    _logger.LogErrorToSql(
+                        logMessage: $"PingFederate: request {requestedIdentity.Id} PingOneAccountLinkingResponse is null for samAccountName: {samAccountName}",
+                        args: null,
+                        requestId: requestedIdentity.Id.ToString(),
+                        pingOneUserId: pingOneUserId,
+                        environment: _hostEnvironment.EnvironmentName,
+                        status: "Error",
+                        detail: $"Status Code {pingFederateAccountLinkingResponse.ErrorStatusCode}");
                 }
 
                 var entraAccountLinkingResponse = await _pingOneService.CreateLinkedAccountForMicrosoftEntra(pingOneUserId, entraObjectId);
@@ -353,24 +391,18 @@ public class IdentityLinkingService : IIdentityLinkingService
                         pingOneUserId: pingOneUserId,
                         environment: _hostEnvironment.EnvironmentName,
                         status: "Error",
-                        detail: "EntraAccountLinkingResponse is null");
-
-                    continue;
+                        detail: "Entra");
                 }
-
-                var ldapGatewayLinkingResponse = await _pingOneService.CreateLinkedAccountForLdapGateway(pingOneUserId, samAccountName);
-                if (ldapGatewayLinkingResponse is null)
+                if (entraAccountLinkingResponse?.ContainsError is true)
                 {
                     _logger.LogErrorToSql(
-                        logMessage: $"RequestId: {requestedIdentity.Id} ldapGatewayLinkingResponse is null for samAccountName: {samAccountName}",
+                        logMessage: $"Entra: request {requestedIdentity.Id} entraAccountLinkingResponse is null for samAccountName: {samAccountName}",
                         args: null,
                         requestId: requestedIdentity.Id.ToString(),
                         pingOneUserId: pingOneUserId,
                         environment: _hostEnvironment.EnvironmentName,
                         status: "Error",
-                        detail: "LdapGatewayLinkingResponse is null");
-
-                    continue;
+                        detail: $"Status Code {entraAccountLinkingResponse.ErrorStatusCode}");
                 }
 
                 _logger.LogInformationToSql(
