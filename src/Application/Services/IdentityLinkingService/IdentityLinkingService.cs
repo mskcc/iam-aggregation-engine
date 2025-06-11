@@ -346,7 +346,7 @@ public class IdentityLinkingService : IIdentityLinkingService
                     }
 
                     _logger.LogErrorToSql(
-                        logMessage: $"Gateway: request {requestedIdentity.Id} ldapGatewayLinkingResponse is null for samAccountName: {samAccountName}",
+                        logMessage: $"Gateway: request {requestedIdentity.Id} responded with status code {ldapGatewayLinkingResponse?.ErrorStatusCode} for samAccountName: {samAccountName}. Lookup this status code here: https://docs.pingidentity.com/pingoneaic/latest/developer-docs/crest/status-codes.html",
                         args: null,
                         requestId: requestedIdentity.Id.ToString(),
                         pingOneUserId: pingOneUserId,
@@ -372,7 +372,7 @@ public class IdentityLinkingService : IIdentityLinkingService
                 if (pingFederateAccountLinkingResponse?.ContainsError is true)
                 {
                     _logger.LogErrorToSql(
-                        logMessage: $"PingFederate: request {requestedIdentity.Id} PingOneAccountLinkingResponse is null for samAccountName: {samAccountName}",
+                        logMessage: $"PingFederate: request {requestedIdentity.Id} responded with status code {pingFederateAccountLinkingResponse.ErrorStatusCode} for samAccountName: {samAccountName}. Lookup this status code here: https://docs.pingidentity.com/pingoneaic/latest/developer-docs/crest/status-codes.html",
                         args: null,
                         requestId: requestedIdentity.Id.ToString(),
                         pingOneUserId: pingOneUserId,
@@ -396,7 +396,7 @@ public class IdentityLinkingService : IIdentityLinkingService
                 if (entraAccountLinkingResponse?.ContainsError is true)
                 {
                     _logger.LogErrorToSql(
-                        logMessage: $"Entra: request {requestedIdentity.Id} entraAccountLinkingResponse is null for samAccountName: {samAccountName}",
+                        logMessage: $"Entra: request {requestedIdentity.Id} responded with status code {entraAccountLinkingResponse.ErrorStatusCode} for samAccountName: {samAccountName}. Lookup this status code here: https://docs.pingidentity.com/pingoneaic/latest/developer-docs/crest/status-codes.html",
                         args: null,
                         requestId: requestedIdentity.Id.ToString(),
                         pingOneUserId: pingOneUserId,
